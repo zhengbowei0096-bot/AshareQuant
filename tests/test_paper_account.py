@@ -72,13 +72,35 @@ class PaperAccountTests(unittest.TestCase):
    r=run(self.root,pd.Timestamp('2026-10-20T18:00:00+08:00').to_pydatetime(),execute)
   self.assertEqual(calls,['history-refresh','run','paper-account']);self.assertEqual(r['status'],'FAILED')
  def test_seeded_holdings_valuation_and_no_fake_purchase(self):
-  seed=dict(cash=1000.0,source='SYNTHETIC_TEST_ONLY',positions={'600000':dict(shares=1000,sellable=1000,reference_price=10.)})
+  seed=dict(cash=525.0,source='SYNTHETIC_TEST_ONLY',positions={'600000':dict(shares=1000,sellable=1000,reference_price=10.)})
   (self.root/'paper_account_seed.json').write_text(json.dumps(seed))
   self.path.unlink();r=self.run_at(AT)
-  self.assertEqual(r['equity'],11000.0);self.assertEqual(r['cash'],1000.0);self.assertEqual(r['positions']['600000']['shares'],1000);self.assertEqual(r['fills'],[])
+  self.assertEqual(r['equity'],10525.0);self.assertEqual(r['cash'],525.0);self.assertEqual(r['positions']['600000']['shares'],1000);self.assertEqual(r['fills'],[])
   a=self.run_at('2026-10-20T18:00:00+08:00');b=self.run_at('2026-10-20T18:01:00+08:00')
-  self.assertEqual(a['equity'],12000.0);self.assertAlmostEqual(a['daily_return'],1000/11000.0);self.assertEqual(a['fills'],[]);self.assertEqual(a['ledger'],b['ledger'])
+  self.assertEqual(a['equity'],11525.0);self.assertAlmostEqual(a['daily_return'],1000/10525.0);self.assertEqual(a['fills'],[]);self.assertEqual(a['ledger'],b['ledger'])
  def test_seed_holdings_missing_evidence_blocks_valuation(self):
-  (self.root/'paper_account_seed.json').write_text(json.dumps(dict(cash=1000.0,source='SYNTHETIC_TEST_ONLY',positions={'600000':dict(shares=1000,sellable=1000,reference_price=10.)})))
+  (self.root/'paper_account_seed.json').write_text(json.dumps(dict(cash=525.0,source='SYNTHETIC_TEST_ONLY',positions={'600000':dict(shares=1000,sellable=1000,reference_price=10.)})))
   self.run_at(AT);r=self.run_at('2026-10-20T18:00:00+08:00',True)
-  self.assertEqual(r['status'],'BLOCKED_DATA');self.assertIsNone(r['daily_return']);self.assertEqual(r['equity'],11000.0)
+  self.assertEqual(r['status'],'BLOCKED_DATA');self.assertIsNone(r['daily_return']);self.assertEqual(r['equity'],10525.0)
+
+ def test_research_failure_still_settles_without_hiding_failure(self):
+  from asharequant.daily import run
+  import shutil
+  shutil.copy(Path(__file__).resolve().parents[1]/'config.json',self.root/'config.json')
+  calls=[]
+  def execute(command):calls.append(command);return 2 if command=='run' else 0
+  with patch('asharequant.daily.calendar',return_value=(CAL,{})):
+   r=run(self.root,pd.Timestamp('2026-10-20T18:00:00+08:00').to_pydatetime(),execute)
+  self.assertEqual(calls,['history-refresh','run','paper-account']);self.assertEqual(r['status'],'FAILED');self.assertEqual(r['steps'][-1]['exit_code'],0)
+ def test_history_exception_still_attempts_safe_settlement(self):
+  from asharequant.daily import run
+  import shutil
+  shutil.copy(Path(__file__).resolve().parents[1]/'config.json',self.root/'config.json')
+  calls=[]
+  def execute(command):
+   calls.append(command)
+   if command=='history-refresh':raise TimeoutError('provider timeout')
+   return 2
+  with patch('asharequant.daily.calendar',return_value=(CAL,{})):
+   r=run(self.root,pd.Timestamp('2026-10-20T18:00:00+08:00').to_pydatetime(),execute)
+  self.assertEqual(calls,['history-refresh','paper-account']);self.assertEqual(r['status'],'FAILED');self.assertEqual(r['steps'][-1]['exit_code'],2)

@@ -126,6 +126,10 @@ def enrich(root,payload,watch):
                 prediction_interval80=f.get('interval80_empirical'),model_uncertainty=f.get('model_uncertainty',{'status':'UNAVAILABLE','std':None}),
                 composite_score=composite,forecast_status='AVAILABLE_RESEARCH_ONLY' if f else 'MISSING',
                 forecast_validation_passed=f.get('validation',{}).get('preliminary_screen_passed',False),input_error=errs.get(s),executable=False))
+    from .probability_display import fields as probability_fields
+    for item in output:
+        f=forecasts.get(item['symbol'],{}).get('forecasts',{}).get(str(item['horizon']),{})
+        item.update(probability_fields(f));item['probability_calibrated']=item['probability_validated']
     eligible=sorted([r for r in output if r['horizon']==20 and r['composite_score']['score'] is not None],key=lambda r:(-r['composite_score']['score'],r['symbol']))
     ranks={r['symbol']:i+1 for i,r in enumerate(eligible)}
     for r in output:r['composite_rank']=ranks.get(r['symbol'])
@@ -134,15 +138,16 @@ def enrich(root,payload,watch):
 
 def export(rows,folder):
     def pct(x):return '缺失' if x is None else f'{x:.2%}'
+    from .probability_display import text as probability_text,html_cell
     table=[];flat=[]
     for r in sorted(rows,key=lambda x:(x['horizon'],x['composite_rank'] or 999,x['symbol'])):
         score=r['composite_score'];u=r['model_uncertainty'];interval=r['prediction_interval80'];details='；'.join(k+':'+('缺失' if p['score'] is None else f'{p["score"]:.1f}') for k,p in score['components'].items())
-        vals=[r['composite_rank'] or '—',r['symbol'],r['name'],r['horizon'],pct(r['expected_return']),pct(r['up_probability']),pct(r['expected_volatility']),pct(r['downside_risk']),
+        vals=[r['composite_rank'] or '—',r['symbol'],r['name'],r['horizon'],pct(r['expected_return']),probability_text(r),pct(r['expected_volatility']),pct(r['downside_risk']),
               '缺失' if interval is None else ' 至 '.join(pct(v) for v in interval),pct(u.get('std')),score['score'] if score['score'] is not None else '缺项不排名',f'{score["coverage"]:.0%}',details]
-        table.append('<tr>'+''.join('<td>'+escape(str(v))+'</td>' for v in vals)+'</tr>')
+        table.append('<tr>'+''.join('<td>'+(html_cell(r) if i==5 else escape(str(v)))+'</td>' for i,v in enumerate(vals))+'</tr>')
         flat.append({k:v for k,v in r.items() if k not in ('composite_score','model_uncertainty','prediction_interval80')}|dict(score=score['score'],score_coverage=score['coverage'],score_missing=';'.join(score['missing']),model_uncertainty_std=u.get('std'),model_uncertainty_method=u.get('method'),interval80_low=interval[0] if interval else None,interval80_high=interval[1] if interval else None,components_json=json.dumps(score['components'],ensure_ascii=False)))
     pd.DataFrame(flat).to_csv(Path(folder)/'seven_metrics.csv',index=False)
-    report = '<section><h2>统一七项指标 · 九因子综合排名</h2><p>按预测期限1/5/20交易日展示；波动率为对应期限估计。下行风险为正态近似95%预期损失；80%收益区间为经验残差区间。模型不确定性单列同模型连续时间子窗口24次重训的均值预测标准差（并非预测区间）；尚未独立校准。上涨概率仅在独立校准通过时展示，否则为空。综合分0–100，预设九因子研究权重，缺项不排名；分数和排名不能启用真实交易。</p><p><a href="seven_metrics.csv">下载统一七项CSV</a>；原始因子、来源、日期、重采样参数及分数明细见forecast.json。评分权重：流动性10%、成交额10%、市值5%、波动10%、趋势10%、财务20%、历史风险10%、行业分散10%、交易状态15%。</p><div class="scroll"><table><tr>'+''.join('<th>'+s+'</th>' for s in ['综合排名','代码','名称','期限','预期收益','上涨概率估计','预期波动率','下行风险ES95','收益区间80%','模型不确定性SD','综合分','因子覆盖','九因子分项'])+'</tr>'+''.join(table)+'</table></div></section>'
+    report = '<section><h2>统一七项指标 · 九因子综合排名</h2><p>按预测期限1/5/20交易日展示；波动率为对应期限估计。下行风险为正态近似95%预期损失；80%收益区间为经验残差区间。模型不确定性单列同模型连续时间子窗口24次重训的均值预测标准差（并非预测区间）；尚未独立校准。上涨概率展示研究估计及验证未通过原因；未验证估计不授予交易资格。综合分0–100，预设九因子研究权重，缺项不排名；分数和排名不能启用真实交易。</p><p><a href="seven_metrics.csv">下载统一七项CSV</a>；原始因子、来源、日期、重采样参数及分数明细见forecast.json。评分权重：流动性10%、成交额10%、市值5%、波动10%、趋势10%、财务20%、历史风险10%、行业分散10%、交易状态15%。</p><div class="scroll"><table><tr>'+''.join('<th>'+s+'</th>' for s in ['综合排名','代码','名称','期限','预期收益','上涨概率估计','预期波动率','下行风险ES95','收益区间80%','模型不确定性SD','综合分','因子覆盖','九因子分项'])+'</tr>'+''.join(table)+'</table></div></section>'
 
     return compact_metrics_html(report)
 

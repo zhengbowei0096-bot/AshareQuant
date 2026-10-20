@@ -31,24 +31,24 @@ class ConnectionTests(unittest.TestCase):
     def test_account_snapshot_not_live_and_private_fields_removed(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'data').mkdir();p=root/'input.json'
-            a=dict(broker='Example Broker',cash=1000.0,available_cash=1000.0,positions={'600031':dict(shares=2000,sellable=2000)},source='SYNTHETIC',asof=None,account_number='DO_NOT_PERSIST')
+            a=dict(broker='华福证券',cash=525.0,available_cash=525.0,positions={'600031':dict(shares=3000,sellable=3000)},source='SYNTHETIC',asof=None,account_number='DO_NOT_PERSIST')
             p.write_text(json.dumps(a));r=import_account(root,p)
-            self.assertFalse(r['live_connection']);self.assertNotIn('account_number',r);self.assertEqual(r['positions']['600031']['shares'],2000)
+            self.assertFalse(r['live_connection']);self.assertNotIn('account_number',r);self.assertEqual(r['positions']['600031']['shares'],3000)
     def test_bad_account_rejected(self):
-        with self.assertRaises(ValueError):validate_account(dict(broker='Example Broker',cash=10,available_cash=11,positions={}))
+        with self.assertRaises(ValueError):validate_account(dict(broker='华福证券',cash=10,available_cash=11,positions={}))
     def test_observed_fee_not_inferred_contract(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'data').mkdir();p=root/'fee.json'
-            d=dict(side='SELL',symbol='600031',notional=20000.,net_cash=19984.80,commission=5.,stamp=10.0,transfer=.20,source='SYNTHETIC',trade_date=None)
+            d=dict(side='SELL',symbol='600031',notional=28240.,net_cash=28220.60,commission=5.,stamp=14.12,transfer=.28,source='SYNTHETIC',trade_date=None)
             p.write_text(json.dumps(d));r=import_fee_observation(root,p)
-            self.assertFalse(r['fees_verified']);self.assertTrue(r['commission_rate_unknown']);self.assertAlmostEqual(r['commission_upper_bound_bps'],5/20000*10000)
+            self.assertFalse(r['fees_verified']);self.assertTrue(r['commission_rate_unknown']);self.assertAlmostEqual(r['commission_upper_bound_bps'],5/28240*10000)
             d['net_cash']=28000;p.write_text(json.dumps(d))
             with self.assertRaises(ValueError):import_fee_observation(root,p)
     def test_missing_index_unknown(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'data').mkdir();self.assertEqual(market_environment(root,'2026-10-19')['state'],'unknown')
     def test_unknown_snapshot_timestamp_blocks(self):
-        r=build_plan([],None,DEFAULTS,dict(cash=1000.0,available_cash=1000.0,positions={},source='screenshot',asof=None),AT)
+        r=build_plan([],None,DEFAULTS,dict(cash=525.0,available_cash=525.0,positions={},source='screenshot',asof=None),AT)
         self.assertIn('ACCOUNT_STALE_OR_UNVERIFIED',r['blockers'])
 class CalibrationTests(unittest.TestCase):
     def fixture(self):

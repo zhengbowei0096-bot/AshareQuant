@@ -1,0 +1,62 @@
+{
+  "start_date": "2020-01-01",
+  "pool_target": 30,
+  "pool_min": 30,
+  "pool_max": 50,
+  "min_history": 252,
+  "min_average_amount": 100000000,
+  "min_price": 3,
+  "min_listing_days": 365,
+  "full_refresh_days": 7,
+  "overlap_days": 30,
+  "worker_timeout_seconds": 90,
+  "attempts": 2,
+  "retry_seconds": 15,
+  "request_spacing_seconds": 2,
+  "calendar_max_age_days": 7,
+  "fast_window": 20,
+  "slow_window": 60,
+  "commission_bps": 3,
+  "slippage_bps": 5,
+  "sell_tax_bps": 5,
+  "initial_capital": 100000,
+  "train_fraction": 0.7,
+  "schedule_timezone": "Asia/Shanghai",
+  "schedule_hour": 18,
+  "schedule_minute": 0,
+  "listing_dates": {
+    "001309": "2022-07-01"
+  },
+  "verified_suspensions": {
+    "600030": [
+      {
+        "start": "2022-01-19",
+        "end": "2022-01-26",
+        "reason": "A股配股缴款及清算停牌",
+        "source": "https://www.cs.ecitic.com/newsite/tzzgx/ggyth/gg/hggg/202201/P020220120768885794469.pdf"
+      }
+    ],
+    "600900": [
+      {
+        "start": "2021-11-29",
+        "end": "2021-12-10",
+        "reason": "筹划重大资产重组；2021年报披露12月13日复牌",
+        "source": "https://www.sse.com.cn/disclosure/bond/announcement/corporate/c/new/2022-04-29/120303_20220429_1_53vYkuyT.pdf"
+      },
+      {
+        "start": "2022-10-26",
+        "end": "2022-10-26",
+        "reason": "重组委审核停牌",
+        "source": "https://static.sse.com.cn/disclosure/listedinfo/announcement/c/new/2022-10-25/600900_20221025_1_C1CQdtT2.pdf"
+      }
+    ],
+    "600066": [
+      {
+        "start": "2023-04-17",
+        "end": "2023-04-17",
+        "reason": "要约收购期限届满，确认收购结果，停牌一个交易日",
+        "source": "https://static.cninfo.com.cn/finalpage/2023-04-15/1216411831.PDF"
+      }
+    ]
+  }
+}

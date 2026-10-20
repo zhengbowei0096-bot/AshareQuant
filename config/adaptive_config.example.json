@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "mode": "RESEARCH_PAPER_ONLY",
+  "news_refresh_seconds": 120,
+  "feed_max_age_seconds": 300,
+  "event_max_age_hours": 72,
+  "trend_window_seconds": 300,
+  "trend_min_samples": 6,
+  "trend_max_gap_seconds": 90,
+  "positive_trend_factor": 1.15,
+  "negative_trend_factor": 0.5,
+  "positive_announcement_factor": 1.1,
+  "negative_announcement_factor": 0.5,
+  "negative_news_factor": 0.8,
+  "max_weight_multiplier": 1.25,
+  "real_orders_enabled": false
+}

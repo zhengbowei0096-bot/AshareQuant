@@ -163,7 +163,7 @@ def market_environment(root,asof):
 
 
 def validate_account(a):
-    if a.get('broker')!='Example Broker': raise ValueError('当前账户适配要求Example Broker标识')
+    if a.get('broker')!='华福证券': raise ValueError('当前账户适配要求华福证券标识')
     for k in ('cash','available_cash'):
         if number(a.get(k)) is None or a[k]<0: raise ValueError('账户现金缺失或无效')
     if a['available_cash']>a['cash']: raise ValueError('可用资金超过现金')
@@ -194,7 +194,7 @@ def import_fees(root,path):
     if c['commission_bps']>30: raise ValueError('佣金超过A股范围，请核验单位bps')
     for k in ('commission_includes_regulatory','commission_includes_transfer'):
         if not isinstance(c.get(k),bool): raise ValueError('必须明确是否包含规费/过户费')
-    if c.get('broker')!='Example Broker' or not c.get('evidence') or not c.get('effective_date'): raise ValueError('须提供券商、费用证据和生效日期')
+    if c.get('broker')!='华福证券' or not c.get('evidence') or not c.get('effective_date'): raise ValueError('须提供券商、费用证据和生效日期')
     if pd.Timestamp(c['effective_date']).date()>now().date(): raise ValueError('费用生效日期尚未到达')
     overrides=c.get('fee_market_overrides',{})
     if overrides:

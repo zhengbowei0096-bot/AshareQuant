@@ -13,7 +13,7 @@ from .report import build_report
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='AshareQuant 本地行情与研究系统')
-    parser.add_argument('command', choices=['paper-account','broker-refresh','public-history','connection-health','prediction-quality','iteration','code-guard','history-refresh','lifecycle', 'strict-validate', 'daily', 'daily-verify', 'strict-audit', 'run', 'report', 'check', 'status', 'database', 'forecast', 'indices', 'index-research', 'factors', 'factor-research', 'model-research', 'risk-research', 'model-monitor', 'decision', 'portfolio-validate', 'connect-refresh', 'connections', 'account-import', 'fees-import', 'fee-observation', 'probability-calibrate', 'execution-replay', 'history-import'])
+    parser.add_argument('command', choices=['active-research','strategy-experiment','research-paper','risk-plan','paper-account','broker-refresh','public-history','connection-health','prediction-quality','iteration','code-guard','history-refresh','lifecycle', 'strict-validate', 'daily', 'daily-verify', 'strict-audit', 'run', 'report', 'check', 'status', 'database', 'forecast', 'indices', 'index-research', 'factors', 'factor-research', 'model-research', 'risk-research', 'model-monitor', 'decision', 'portfolio-validate', 'connect-refresh', 'connections', 'account-import', 'fees-import', 'fee-observation', 'probability-calibrate', 'execution-replay', 'history-import'])
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--dataset', choices=['all','industry','valuations','financial','macro'], default='all')
     parser.add_argument('--method', choices=['equal_weight','risk_parity','mean_variance','constrained_score'], help='仅选择研究目标，不启用正式交易')
@@ -27,9 +27,57 @@ def main(argv=None):
                         force=True, handlers=[logging.StreamHandler(),
                                   logging.FileHandler(root / 'logs' / 'app.log', encoding='utf-8')])
     try:
+        if args.command == 'active-research':
+            from .active_research import run
+            with run_lock(root): result=run(root)
+            print(json.dumps({k:result.get(k) for k in ('status','asof','equity','cash','alerts')},ensure_ascii=False))
+            return 2 if result['status']=='BLOCKED_DATA' else 0
+        if args.command == 'strategy-experiment':
+            from .strategy_experiment import run
+            with run_lock(root): result=run(root)
+            print(json.dumps({k:result.get(k) for k in ('status','asof','target_session','snapshot_count','alerts')},ensure_ascii=False))
+            return 2 if result['status']=='BLOCKED_DATA' else 0
+        if args.command == 'research-paper':
+            from .research_paper import run
+            with run_lock(root):
+                result=run(root)
+                from .holding_summary import update
+                if result["status"]!="DISABLED":update(root,result)
+            print(json.dumps({k:v for k,v in result.items() if k in ('status','equity','cash','alerts','submitted_orders')},ensure_ascii=False))
+            return 2 if result['status']=='BLOCKED_DATA' else 0
+        if args.command == 'risk-plan':
+            from .risk_control import run
+            with run_lock(root):result=run(root)
+            print(json.dumps(result,ensure_ascii=False,indent=2))
+            return 2 if result['status']=='BLOCKED_DATA' else 0
         if args.command == 'paper-account':
             from .paper_account import run
-            with run_lock(root):result=run(root)
+            with run_lock(root):
+                result=run(root)
+                from .risk_control import run as risk_plan
+                from .research_paper import enabled,run as research_paper
+                if enabled(root):
+                    research=research_paper(root)
+                    from .holding_summary import update
+                    update(root,research)
+                    from .strategy_experiment import run as compare_strategies
+                    if research["status"]=="ACTIVE_RESEARCH_PAPER":
+                        compare_strategies(root)
+                        from .active_research import run as active_research
+                        active=active_research(root)
+                        if active["status"]=="BLOCKED_DATA":
+                            result["status"]="BLOCKED_DATA"
+                            result["alerts"].extend(active["alerts"])
+                    if research["status"]=="BLOCKED_DATA":
+                        result["status"]="BLOCKED_DATA"
+                        result["alerts"].extend(research["alerts"])
+                risk_plan(root)
+                from .intraday import enabled as intraday_enabled,close_day
+                if intraday_enabled(root):
+                    intraday_day=json.loads((root/"reports/active_research/latest/report.json").read_text())["asof"]
+                    close_day(root,intraday_day)
+                    from .adaptive_intraday import enabled as adaptive_enabled,close_day as adaptive_close
+                    if adaptive_enabled(root):adaptive_close(root,intraday_day)
             print(json.dumps({k:result[k] for k in ('status','start_session','equity','cash','daily_return','cumulative_return','alerts','submitted_orders')},ensure_ascii=False,indent=2))
             return 2 if result['status']=='BLOCKED_DATA' else 0
         if args.command in ('daily','daily-verify'):

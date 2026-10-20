@@ -1,0 +1,5 @@
+{
+  "timezone": "Asia/Shanghai",
+  "account_returns_policy": "No automatic account import; missing NAV or cashflow means null",
+  "source_updates": "No automatic code publication"
+}

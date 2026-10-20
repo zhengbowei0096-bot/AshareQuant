@@ -38,8 +38,8 @@ class RiskTests(unittest.TestCase):
   from pathlib import Path
   from asharequant.forecast import account_snapshot_plan
   with tempfile.TemporaryDirectory() as tmp:
-   root=Path(tmp);(root/'data').mkdir();a={'cash':1000.0,'available_cash':1000.0,'positions':{'000681':{'name':'视觉中国','shares':1000,'reference_price':10.0}}}
+   root=Path(tmp);(root/'data').mkdir();a={'cash':525.0,'available_cash':525.0,'positions':{'000681':{'name':'视觉中国','shares':3600,'reference_price':15.87}}}
    (root/'data/decision_account.json').write_text(json.dumps(a))
    account,plan=account_snapshot_plan(root,[])
-   self.assertEqual(plan['cash'],1000.0);self.assertEqual(plan['current_holdings'][0]['shares'],1000)
-   self.assertEqual(plan['positions'],[]);self.assertAlmostEqual(plan['equity'],1000.0+1000*10.0)
+   self.assertEqual(plan['cash'],525.0);self.assertEqual(plan['current_holdings'][0]['shares'],3600)
+   self.assertEqual(plan['positions'],[]);self.assertAlmostEqual(plan['equity'],525.0+3600*15.87)

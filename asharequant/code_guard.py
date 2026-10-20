@@ -10,7 +10,7 @@ PROTECTED=('asharequant/lifecycle.py','asharequant/iteration.py','asharequant/co
 
 def files(root):
     root=Path(root);out={}
-    for pattern in ('asharequant/*.py','tests/test*.py','*_config.json','config.json','watchlist.csv'):
+    for pattern in ('asharequant/**/*.py','tests/test*.py','*_config.json','config.json','watchlist.csv'):
         for p in root.glob(pattern):
             if p.is_symlink() or not p.resolve().is_relative_to(root.resolve()):raise ValueError('SYMLINK_SOURCE_REJECTED')
             out[str(p.relative_to(root))]=hashlib.sha256(p.read_bytes()).hexdigest()

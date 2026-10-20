@@ -58,6 +58,15 @@ def _run(root, at=None, execute=None, verify=False):
                             raise ValueError('当日预测缺失、不完整或日期不一致')
                 else: status='SUCCESS'
             except Exception as exc: error=str(exc)
+            # Settlement is independent of research success. Its own data and
+            # frozen-plan checks remain mandatory; never turn a failed run green.
+            if not any(x['command']=='paper-account' for x in steps):
+                try:
+                    code=call('paper-account')
+                    steps.append(dict(command='paper-account',exit_code=code,independent_settlement=True))
+                except Exception as exc:
+                    steps.append(dict(command='paper-account',exit_code=1,independent_settlement=True,error=str(exc)))
+                    error=(error+'; ' if error else '')+'PAPER_SETTLEMENT_FAILED:'+str(exc)
             after={name:hashlib.sha256((root/name).read_bytes()).hexdigest() if (root/name).exists() else None for name in stable_inputs}
             if before!=after:
                 status='FAILED';error='CONFIG_OR_ACCOUNT_CHANGED_DURING_RUN'

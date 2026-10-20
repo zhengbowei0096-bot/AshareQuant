@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "refresh_seconds": 30,
+  "quote_max_age_seconds": 45,
+  "book_participation": 0.01,
+  "move_alert_fraction": 0.05,
+  "limit_alert_fraction": 0.01,
+  "notification_enabled": true,
+  "maximum_drawdown": 0.15,
+  "minimum_equity": 120000,
+  "real_orders_enabled": false
+}

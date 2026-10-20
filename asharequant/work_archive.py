@@ -3,7 +3,7 @@ from pathlib import Path
 import hashlib,html,json,os,re,zipfile
 from .core import now,write_json,atomic_text
 
-PATTERNS=('asharequant/*.py','tests/test*.py','tools/*.py','*.py','*.md','*.txt','*.command','config.json','*_config.json','watchlist.csv')
+PATTERNS=('asharequant/**/*.py','tests/test*.py','tools/*.py','scripts/*.py','docs/**/*.md','config/*.example.json','config/*.example.csv','*.py','*.md','*.txt','*.command','config.json','*_config.json','watchlist.csv')
 
 def record(root,delivery,pipeline):
     root=Path(root);stamp=now();base=root/'archive';day=base/str(stamp.date());sources={}

@@ -73,6 +73,15 @@ class Tushare:
         raise ValueError('TUSHARE_PAGINATION_TRUNCATED:'+name)
 
 
+def query_with_retry(client,api,params):
+    # Retry only transient transport failures, never schema/permission errors.
+    for attempt in range(3):
+        try:return client.query(api,**params)
+        except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+            if attempt==2:raise
+            time.sleep(2*(attempt+1))
+
+
 def _public(root,cfg):
     from .data import network_job
     results=[];errors=[]
@@ -97,7 +106,7 @@ def refresh(root,days=1900,public=True,force=False):
     existing=root/'data/history/latest.json'
     if existing.exists() and not force:
         old=json.loads(existing.read_text())
-        if old.get('asof')==str(end.date()) and old.get('token_available')==bool(credential(root)) and old.get('range_start')<=str(start.date()) and (pd.Timestamp(now())-pd.Timestamp(old['fetched_at'])).total_seconds()<3600:
+        if not any(e.get('provider','').startswith('Tushare') for e in old.get('errors',[])) and old.get('asof')==str(end.date()) and old.get('token_available')==bool(credential(root)) and old.get('range_start')<=str(start.date()) and (pd.Timestamp(now())-pd.Timestamp(old['fetched_at'])).total_seconds()<3600:
             # Validate cached references; a corrupted cache never becomes successful.
             try:
                 for ref in old.get('references',[]):verified(root,ref)
@@ -123,7 +132,7 @@ def refresh(root,days=1900,public=True,force=False):
                 params=dict(ts_code=code,_fields=API_FIELDS[api])
                 if api not in ('dividend','namechange'):params.update(start_date=date0,end_date=date1)
                 try:
-                    rows=client.query(api,**params);reference=_save(root,api,params,rows,'Tushare');refs.append(reference);datasets[api]=rows;bindings[api]=reference
+                    rows=query_with_retry(client,api,params);reference=_save(root,api,params,rows,'Tushare');refs.append(reference);datasets[api]=rows;bindings[api]=reference
                 except Exception as exc:errors.append(dict(provider='Tushare '+api,symbol=item.symbol,error=str(exc)))
                 time.sleep(1.3)
             if len(datasets)==6:

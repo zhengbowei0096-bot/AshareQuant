@@ -283,10 +283,12 @@ def build_plan(rows, cov, c, account=None, at=None, input_errors=None, formal=No
             calibration_status=f.get('probability_calibration',{}).get('status','MISSING'),
             uncertainty=f.get('interval80_empirical'),downside_risk=f.get('downside_es95_normal_proxy'),
             risk_level='UNKNOWN' if blockers[i] else 'HIGH' if f.get('volatility_horizon',0)>.15 else 'MEDIUM',
-            current_shares=p['shares'],sellable_shares=p['sellable'],target_weight=w,target_amount=round(w*equity,2),
+            current_shares=p['shares'],sellable_shares=p['sellable'],current_weight=float(current[i]),current_amount=round(float(current[i])*equity,2),target_weight=w if weights else None,target_amount=round(w*equity,2) if weights else None,
             target_kind='RESEARCH_TARGET' if weights else 'PRESERVE_CURRENT_PENDING_VALIDATION',
             action='NO_TRADE',suggested_shares=0,cash_after=round(a['cash'],2),available_cash_after=round(a['available_cash'],2),
             executable=False,blockers=flags,reasons=['未选定经验证正式方法；目标配置与交易指令分离','次日价格及状态须重新核验，限价不保证成交']))
+    from .probability_display import fields as probability_fields
+    for d,row in zip(decisions,rows):d.update(probability_fields(row.get('forecast',{})))
     conditional=None
     if approved and weights and not global_flags:
         conditional=candidate_plan(rows,weights,a,c,at)
@@ -477,6 +479,7 @@ def generate(root, selected_method=None):
     html+='<p>'+escape(f"账户假设={result['account_assumed']}；现金 {result['cash_after']:,.2f} 元；行情日 {forecast.get('asof')}；生成时间 {at}")+'</p>'
     from .next_session_plan import render as render_next_session
     html+=render_next_session(result)
+    html+='<p><a href="../../risk_control/latest/index.html">独立风控模拟调仓方案（使用模拟账本，仅减仓，不依赖收益模型准入）</a></p>'
     from .seven_metrics import export as export_seven
     html+=export_seven(result.get('seven_metrics',[]),folder)
     html+='<h2>新增风险模型</h2><p>'+escape(risk_models['reason'])+'</p><p><a href="../../risk_models/latest/index.html">GARCH与HMM样本外验证报告</a></p>'

@@ -356,6 +356,17 @@ def generate(root):
         all_records=pd.concat(oos,ignore_index=True)
         for horizon,records in all_records.groupby('horizon'):
             payload['strict_metrics'][str(horizon)]=strict_metrics(records)
+    # Diagnostic calibration is displayed, not admitted to production.
+    from .probability_calibration import calibrate,predict
+    if oos:
+        diagnostic=pd.concat(oos,ignore_index=True)
+        for h in (1,5,20):
+            report=calibrate(diagnostic[diagnostic.horizon==h],payload['asof'])
+            for row in rows:
+                f=row['forecasts'][str(h)]
+                if f.get('model_status')=='VALIDATED_REGISTERED':continue
+                f['probability_calibration']=report
+                if report.get('model'):f['up_probability_calibrated']=float(predict(report['model'],f['predicted_return']))
     from .seven_metrics import enrich,export
     unified=enrich(root,payload,watch)
     seven_html=export(unified,folder)
@@ -368,7 +379,7 @@ def generate(root):
     for row in rows:
         for h,f in row['forecasts'].items():
             flat.append(dict(symbol=row['symbol'],name=row['name'],horizon=int(h),predicted_return=f['predicted_return'],
-                             probability_up_empirical=None,interval_low=f['interval80_empirical'][0],
+                             probability_up_empirical=f.get('up_probability_empirical'),research_up_probability=f.get('up_probability_calibrated',f.get('up_probability_empirical')),probability_validated=bool(f.get('probability_calibration',{}).get('independent_validated')),interval_low=f['interval80_empirical'][0],
                              interval_high=f['interval80_empirical'][1],mae=f['validation']['mae'],
                              baseline_best_mae=min(f['validation'].get('baseline_mean_mae',f['validation'].get('baseline_mae',0.)),f['validation'].get('baseline_zero_mae',f['validation'].get('baseline_mae',0.))),
                              validation_passed=f['validation']['preliminary_screen_passed'],signal=row['signal'],
@@ -380,14 +391,15 @@ def generate(root):
         vals=[row['symbol'],row['name'],f"{row['close']:.2f}"]
         for h in ('1','5','20'):
             f=row['forecasts'][h]
-            vals.append(f"{f['predicted_return']:.2%} / 未通过独立校准")
+            from .probability_display import fields as probability_fields,text as probability_text
+            vals.append(f"{f['predicted_return']:.2%} / "+probability_text(probability_fields(f)))
         f=row['forecasts']['20']
         vals.extend([f"{f['interval80_empirical'][0]:.2%} 至 {f['interval80_empirical'][1]:.2%}",
                      f"{f['validation']['mae_improvement']:.1%}",row['signal'],'；'.join(row['allocation_blockers'])])
         table.append('<tr>'+''.join('<td>'+escape(str(v))+'</td>' for v in vals)+'</tr>')
     ptable=''.join('<tr>'+''.join('<td>'+escape(str(pos[k]))+'</td>' for k in ['symbol','name','shares','reference_price','reference_notional','estimated_entry_cost'])+'</tr>' for pos in plan['positions'])
     html='''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>15万元预测与模拟配置</title><style>body{font:16px/1.7 system-ui;background:#f4f6fa;color:#17253a;margin:0}main{max-width:1400px;margin:auto;padding:32px}section{background:white;padding:24px;margin:20px 0;border-radius:12px}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:12px;border-bottom:1px solid #ddd;text-align:left;min-width:80px}h1{font-size:28px}.amount{font-size:24px;color:#08675e}.note{color:#754509}</style><main>'''
-    html+='<p class="note">研究模式 RESEARCH_ONLY：无正式合格模型，不生成可执行交易。经验残差统计仅存于审计JSON，不能当作已校准上涨概率。</p>'
+    html+='<p class="note">研究模式 RESEARCH_ONLY：无正式合格模型，不生成可执行交易。研究概率显示估计值和验证原因；未验证估计不能作为正式交易依据。</p>'
     html+=f'<h1>15万元 · 多期限预测与模拟配置</h1><p>数据截至 {escape(payload["asof"])}；五年窗口自 {escape(payload["start"])}。已核验 {len(rows)} 只，失败 {len(errors)} 只。</p>'
     if account is not None:
         htable=''.join('<tr>'+''.join('<td>'+escape(str(h[k]))+'</td>' for k in ['symbol','name','shares','reference_price','reference_notional'])+'</tr>' for h in plan['current_holdings'])
