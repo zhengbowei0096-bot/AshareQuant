@@ -1,4 +1,4 @@
-# AshareQuant
+# 观澜量化｜A股研究与交易决策系统
 
 面向 A 股的本地量化研究、预测、风险管理与模拟交易系统。持续观察 20–50 只股票，以主板为主，把行情、模型判断、交易成本和仓位约束整理成可追溯的分析报告。
 
@@ -74,8 +74,8 @@ requirements*.txt     基础依赖和研究环境版本记录
 建议 macOS/Linux、Python 3.11。文件锁使用 `fcntl`，原生 Windows 尚未支持。以下测试使用既有 Python 环境验证；全新机器的完整依赖安装及所有网络接口不能据此宣称已验收。
 
 ```bash
-git clone https://github.com/zhengbowei0096-bot/AshareQuant.git
-cd AshareQuant
+git clone https://github.com/zhengbowei0096-bot/GuanlanQuant.git
+cd GuanlanQuant
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
