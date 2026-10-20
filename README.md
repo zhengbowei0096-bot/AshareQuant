@@ -74,7 +74,7 @@ requirements*.txt     基础依赖和研究环境版本记录
 建议 macOS/Linux、Python 3.11。文件锁使用 `fcntl`，原生 Windows 尚未支持。以下测试使用既有 Python 环境验证；全新机器的完整依赖安装及所有网络接口不能据此宣称已验收。
 
 ```bash
-git clone --branch maintenance/project-organization https://github.com/zhengbowei0096-bot/AshareQuant-Private.git
+git clone https://github.com/zhengbowei0096-bot/AshareQuant-Private.git
 cd AshareQuant-Private
 python3.11 -m venv .venv
 source .venv/bin/activate
