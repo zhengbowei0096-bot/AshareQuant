@@ -235,11 +235,11 @@ def publish(root,meta,s,result):
     folder=root/'reports/dynamic/latest';folder.mkdir(parents=True,exist_ok=True)
     with db_open(root) as db:
         nav=list(get(db,'nav').values());execution_code=reviewed_code(db,meta)
-        last=db.execute("SELECT body FROM records WHERE kind='cycles' ORDER BY CAST(key AS INTEGER) DESC LIMIT 1").fetchone()
-    if 'decision_rows' not in result and last:
-        last=json.loads(last[0]);result={**result,'decision_rows':last['result'].get('decision_rows',[]),'last_decision_at':last['at']}
-    
-    r=dict(checked_at=now().isoformat(),mode='PAPER_ONLY',submitted_real_orders=0,meta=meta,account=s,nav=nav,execution_code=execution_code,**result)
+        from .reporting.dynamic_status import snapshot as decision_snapshot
+        checked_at=now().isoformat()
+        diagnostic=decision_snapshot(db,meta['universe'],checked_at,result['status'])
+    result={**result,'decision_rows':diagnostic['rows'],'last_decision_at':diagnostic['last_decision_at']}
+    r=dict(checked_at=checked_at,mode='PAPER_ONLY',submitted_real_orders=0,meta=meta,account=s,nav=nav,execution_code=execution_code,decision_diagnostic={k:v for k,v in diagnostic.items() if k!='rows'},**result)
     r['unrealized_pnl_estimate']=sum(p['shares']*s['marks'][k]-p['basis'] for k,p in s['positions'].items())
     r['cumulative_return']=s['equity']/meta['initial_equity']-1;r['capital_utilization']=1-s['cash']/s['equity']
     r['limitations']=['仅模拟委托与估值，真实账户由用户手动交易，成交价/数量可能不同','盘中未完成日线输入尚未独立验证，原模型及正式准入标准不变','公开行情30秒轮询，无逐笔权限或低延迟服务承诺；资料缺失暂停','既有持仓成本按迁移估值建立阶段基准，不能当作券商历史成本','自动重报价通过超时撤单、冷却及新风险检查产生新委托，不追补断线期间成交']
@@ -255,10 +255,8 @@ def publish(root,meta,s,result):
     positions=''.join('<tr>'+''.join('<td>'+e(x)+'</td>' for x in [meta['universe'].get(k,k),p['shares'],p['sellable'],round(p.get('basis',0),2),s['marks'].get(k),round(p['shares']*s['marks'][k]-p.get('basis',0),2)])+'</tr>' for k,p in s['positions'].items() if p['shares'])
     page='<html lang="zh"><meta charset="utf-8"><meta http-equiv="refresh" content="30"><title>动态模拟交易与收益</title><style>body{font:15px/1.5 system-ui;margin:20px;color:#183047}table{border-collapse:collapse}th,td{padding:5px 9px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top;white-space:nowrap}.scroll{overflow:auto}h2{margin:16px 0 6px}</style><h1>动态模拟账户 · 不操作真实资金</h1><p>检查 '+e(r['checked_at'])+'；状态 '+e(r['status'])+'；估值 '+e(s['valuation_at'])+' / '+e(s['valuation_status'])+'</p><h2>买卖操作与委托状态</h2><p>ACCEPTED是待撮合，PARTIALLY_FILLED为部分模拟成交，FILLED为全部模拟成交；CANCELED/REJECTED没有新增成交。</p><div class="scroll"><table><tr><th>时间</th><th>股票</th><th>方向</th><th>委托股数</th><th>模拟成交股数</th><th>限价</th><th>状态</th><th>状态原因</th><th>依据</th></tr>'+rows+'</table></div>'
     page+='<h2>收益与持仓</h2><p>净值 '+f"{s['equity']:.2f}"+'；现金 '+f"{s['cash']:.2f}"+'；本阶段已实现 '+f"{s['realized_pnl']:.2f}"+'；未实现估值 '+f"{r['unrealized_pnl_estimate']:.2f}"+'；累计 '+f"{r['cumulative_return']:.2%}"+'；累计费用 '+f"{s['total_fees']:.2f}"+'；最大回撤 '+f"{s['max_drawdown']:.2%}"+'。</p><p>'+e(meta['basis_note'])+'</p><div class="scroll"><table><tr><th>股票</th><th>持有</th><th>可卖</th><th>阶段成本</th><th>参考估值价</th><th>阶段浮盈亏</th></tr>'+positions+'</table></div>'
-    page+='<p>判断记录时间：'+e(result.get('last_decision_at',result.get('model',{}).get('at','尚无')))+'</p><h2>最近动态判断与原排名</h2><div class="scroll"><table><tr><th>股票</th><th>原始排名</th><th>当前股数</th><th>动态目标</th><th>预测净收益</th><th>报价时间</th><th>依据</th></tr>'
-    for row in result.get('decision_rows',[]):
-        page+='<tr>'+''.join('<td>'+e(x)+'</td>' for x in [row['name'],row.get('original_rank'),s['positions'].get(row['symbol'],{}).get('shares',0),f"{row['target_weight']:.2%}",f"{row.get('net_expected_return',0):.2%}",row.get('quote_time'),'；'.join(row.get('reasons',[]))])+'</tr>'
-    page+='</table></div>'
+    from .reporting.dynamic_status import render as render_decision_status
+    page+=render_decision_status(diagnostic,meta['universe'],s['positions'])
     page+='<p>'+e(result.get('reason',''))+'</p><ul>'+''.join('<li>'+e(x)+'</li>' for x in r['limitations'])+'</ul><p><a href="FILLS.csv">模拟成交</a> · <a href="ORDERS.csv">委托</a> · <a href="NAV.csv">每日收益</a> · <a href="report.json">完整决策与时间证据</a></p></html>'
     atomic_text(folder/'index.html',page)
     health={k:r[k] for k in ('status','checked_at','mode','submitted_real_orders')};health['reason']=r.get('reason');write_json(root/'logs/dynamic_health.json',health)
