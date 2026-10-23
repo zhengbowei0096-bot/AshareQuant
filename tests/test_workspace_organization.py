@@ -1,5 +1,5 @@
 from pathlib import Path
-import json,tempfile,unittest
+import json,os,stat,tempfile,unittest
 from scripts.organize_workspace import apply,load_plan,rollback,check_owned,safe_relative,public_readmes
 class WorkspaceOrganizationTests(unittest.TestCase):
  def fixture(self,root):
@@ -68,3 +68,20 @@ class WorkspaceOrganizationTests(unittest.TestCase):
    with self.assertRaisesRegex(ValueError,'Unclassified public'):public_readmes(root,layout)
    (root/'link.py').symlink_to('asharequant/main.py');layout['public_navigation']['files']=['link.py']
    with self.assertRaisesRegex(ValueError,'unsafe public'):public_readmes(root,layout)
+ @unittest.skipUnless(hasattr(os,'chflags'),'Finder visibility requires macOS file flags')
+ def test_homepage_visibility_survives_refresh_and_restores_previous_flags(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);self.fixture(root);page=root/'README.md';page.write_text('Project home\n')
+   p=root/'config/workspace_layout.json';layout=json.loads(p.read_text());layout['groups'][0]['entries'].append(dict(target='README.md',label='Project_Overview.md',purpose='Project home',subfolder=''));layout['public_navigation']={'files':['README.md','asharequant/main.py']};layout['root_visible_files']=['README.md'];p.write_text(json.dumps(layout))
+   os.chflags(page,page.stat().st_flags|stat.UF_HIDDEN);before=page.stat().st_flags
+   result=apply(root);self.assertFalse(page.stat().st_flags & stat.UF_HIDDEN);self.assertTrue((root/'data').stat().st_flags & stat.UF_HIDDEN)
+   self.assertIn('../README.md',(root/'docs/FILE_GUIDE.html').read_text());self.assertIn('Project home',(root/'docs/FILE_GUIDE.md').read_text())
+   second=apply(root);self.assertFalse(page.stat().st_flags & stat.UF_HIDDEN)
+   rollback(root,second['backup']);self.assertFalse(page.stat().st_flags & stat.UF_HIDDEN)
+   rollback(root,result['backup']);self.assertEqual(page.stat().st_flags,before);self.assertEqual(page.read_text(),'Project home\n');self.assertEqual((root/'data/account.sqlite3').read_bytes(),b'ledger fixture')
+ def test_homepage_list_cannot_expose_unreviewed_or_nested_files(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);self.public_fixture(root);p=root/'config/workspace_layout.json';layout=json.loads(p.read_text())
+   for name in ('config.json','data','asharequant/main.py','../README.md','.workspace-layout.json','unknown.md'):
+    layout['root_visible_files']=[name];p.write_text(json.dumps(layout))
+    with self.assertRaises(ValueError):load_plan(root)
