@@ -15,6 +15,12 @@ Public source and documentation only. Local runtime records remain on your compu
 | [tools/verify_models.py](../tools/verify_models.py) | Historical model comparison acceptance: time splits, forecast replay and shadow records. Requires existing comparison results. (模型对比历史验收，需要已有本地报告。) |
 | [tools/verify_risk_models.py](../tools/verify_risk_models.py) | Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。) |
 
+## Regression_Tests (回归测试)
+
+| File (文件) | Purpose (用途) |
+|---|---|
+| [tests/test_execution_regressions.py](../tests/test_execution_regressions.py) | Synthetic tests for lot rounding, immutable model history, time guards and append-only execution upgrades. (股数取整、历史快照、时间校验与追加升级审核测试。) |
+
 ## Files (文件)
 
 | File (文件) | Purpose (用途) |
