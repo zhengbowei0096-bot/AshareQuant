@@ -69,7 +69,8 @@ Public source and documentation only. Local runtime records remain on your compu
 | [asharequant/strict_validation.py](../asharequant/strict_validation.py) | Validation module: strict_validation.py (时间划分、滚动验证、时点对齐、风险收益指标和正式资格检查的基础工具。) |
 | [asharequant/validation_engine.py](../asharequant/validation_engine.py) | Validation module: validation_engine.py (固定规格训练/验证/测试和推理接口；已被查看的历史数据不冒充未触碰测试集。) |
 | [asharequant/model_research.py](../asharequant/model_research.py) | Validation module: model_research.py (新旧候选模型的配对历史比较、显著性检验及前瞻影子预测记录。) |
-| [asharequant/iteration.py](../asharequant/iteration.py) | Validation module: iteration.py (根据漂移或预设触发条件组织候选研究，不使用前瞻验收样本迎合调参。) |
+| [asharequant/iteration.py](../asharequant/iteration.py) | Fingerprint-bound candidate search and legacy cadence retained for audit; current CLI scheduling is in daily_iteration.py. (保留原候选算法与旧调度供指纹审计，当前日常调度见 daily_iteration.py。) |
+| [asharequant/daily_iteration.py](../asharequant/daily_iteration.py) | Daily scheduling of matured forecast/actual comparisons, one checkpoint per session, frozen-candidate progress and unchanged promotion gates. (每天比较到期预测与实际结果，同日去重；候选冻结验收，门槛不变。) |
 | [asharequant/lifecycle.py](../asharequant/lifecycle.py) | Validation module: lifecycle.py (Champion–Challenger 生命周期：实验冻结、预测到期、独立验收、晋升、资格撤销及正式模型准入。) |
 | [asharequant/model_monitor.py](../asharequant/model_monitor.py) | Validation module: model_monitor.py (持续记录预测误差、评估模型状态，必要时限制不再满足要求的模型。) |
 | [asharequant/evaluation/prediction_quality.py](../asharequant/evaluation/prediction_quality.py) | Validation module: evaluation/prediction_quality.py (不可随意改写的预测与实际结果记录，计算到期误差及统计质量；本身不是交易开关。) |
@@ -84,6 +85,7 @@ Public source and documentation only. Local runtime records remain on your compu
 | [asharequant/reporting/plain_chinese.py](../asharequant/reporting/plain_chinese.py) | Reporting module: plain_chinese.py (报告中文阅读层，解释委托撤销、数据快照及模型校验状态；不改变原始数值与记录。) |
 | [asharequant/reporting/report.py](../asharequant/reporting/report.py) | Reporting module: reporting/report.py (生成主要分析网页、图表和指标展示。) |
 | [asharequant/reporting/daily_bundle.py](../asharequant/reporting/daily_bundle.py) | Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。) |
+| [asharequant/reporting/iteration_status.py](../asharequant/reporting/iteration_status.py) | Readable research status, waiting reason, prior study and next eligible time; explicit empty states. (显示研究等待原因、上次结果和下次时间，无空表格。) |
 | [asharequant/reporting/holding_summary.py](../asharequant/reporting/holding_summary.py) | Reporting module: reporting/holding_summary.py (从已冻结的研究计划提取现有持仓操作摘要，展示建议股数和依据。) |
 | [asharequant/reporting/probability_display.py](../asharequant/reporting/probability_display.py) | Reporting module: reporting/probability_display.py (展示研究上涨概率和未通过原因，避免把研究估计写成已验证概率。) |
 | [asharequant/reporting/report_navigation.py](../asharequant/reporting/report_navigation.py) | Reporting module: reporting/report_navigation.py (管理完整总览与动态模拟入口，每30秒同步桌面实时展示及附件，隐藏旧策略；不修改模型或账本。) |
