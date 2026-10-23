@@ -3,10 +3,18 @@ import json
 import shutil
 import tempfile
 import unittest
+import runpy
+from unittest.mock import patch
 from pathlib import Path
 from scripts.init_config import initialize
 
 class LayoutTests(unittest.TestCase):
+    def test_relocated_comparison_entry_delegates_without_running_local_data(self):
+        with patch('asharequant.compare.main',return_value=0) as compare:
+            with self.assertRaises(SystemExit) as result:
+                runpy.run_module('tools.compare_sources',run_name='__main__')
+            self.assertEqual(result.exception.code,0)
+            compare.assert_called_once_with()
     def test_old_and_new_module_identity(self):
         pairs = {'asharequant/database.py': 'asharequant/data_sources/database.py', 'asharequant/broker_records.py': 'asharequant/data_sources/broker_records.py', 'asharequant/report.py': 'asharequant/reporting/report.py', 'asharequant/report_navigation.py': 'asharequant/reporting/report_navigation.py', 'asharequant/daily_bundle.py': 'asharequant/reporting/daily_bundle.py', 'asharequant/holding_summary.py': 'asharequant/reporting/holding_summary.py', 'asharequant/probability_display.py': 'asharequant/reporting/probability_display.py', 'asharequant/next_session_plan.py': 'asharequant/strategies/next_session_plan.py', 'asharequant/risk_control.py': 'asharequant/risk/risk_control.py', 'asharequant/research.py': 'asharequant/backtesting/research.py', 'asharequant/validation_readiness.py': 'asharequant/evaluation/validation_readiness.py', 'asharequant/prediction_quality.py': 'asharequant/evaluation/prediction_quality.py', 'asharequant/connection_health.py': 'asharequant/evaluation/connection_health.py', 'asharequant/factor_research.py': 'asharequant/evaluation/factor_research.py'}
         for old,new in pairs.items():
