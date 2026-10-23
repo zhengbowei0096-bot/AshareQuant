@@ -1,7 +1,8 @@
 """Build an English-first Finder workspace without moving runtime inputs or ledgers.
 
 The generated folders contain relative links and purpose guides. On macOS only,
-original root entries are hidden from Finder; Python paths stay unchanged.
+reviewed homepage files remain visible; other classified root entries are
+hidden from Finder. Python paths stay unchanged.
 """
 from pathlib import Path
 import argparse, datetime, hashlib, html, json, os, shlex, shutil, stat, sys, zipfile
@@ -36,6 +37,15 @@ def load_plan(root):
     source={e['target'] for g in groups for e in g['entries'] if e['target'].startswith('asharequant/')}
     unlisted=sorted(p.relative_to(root).as_posix() for p in (root/'asharequant').rglob('*.py') if p.relative_to(root).as_posix() not in source)
     if unlisted:raise ValueError('Unclassified source files: '+', '.join(unlisted))
+    for name in layout.get('root_visible_files',[]):
+        p=safe_relative(name)
+        if len(p.parts)!=1 or name.startswith('.') or name not in covered:
+            raise ValueError('Homepage file must be a classified root file: '+name)
+        if name not in layout.get('public_navigation',{}).get('files',[]):
+            raise ValueError('Homepage file must be reviewed for publication: '+name)
+        target=root/p
+        if target.is_symlink() or (target.exists() and not target.is_file()):
+            raise ValueError('Unsafe homepage file: '+name)
     return layout
 
 def guide_html(title,body):
@@ -129,6 +139,16 @@ def cache_candidates(root):
 def generate_guide(root,layout):
     md='# AshareQuant File Guide (文件逐项说明)\n\nDesktop workspace: numbered English categories; runtime paths are retained for services and integrity checks. (桌面按编号英文分类，服务路径与完整性检查保持原位。)\n\n'
     body='<p>Numbered categories match the desktop workspace. Source files stay in their existing locations. (编号与桌面一致，源码保留原位置。)</p>'
+    visible=layout.get('root_visible_files',[])
+    if visible:
+        md+='## Project home (项目首页)\n\nThese files remain directly visible beside the ten categories. (以下文件与十个分类并列展示，无需展开文件夹。)\n\n'
+        body+='<h2>Project home (项目首页)</h2><p>These files remain visible beside the ten categories. (以下文件与十个分类并列展示。)</p><ul>'
+        for name in visible:
+            entry=next(e for g in layout['groups'] for e in g['entries'] if e['target']==name)
+            href='../'+quote(name,safe='');purpose=entry['purpose']
+            md+='- ['+name+']('+href+') — '+purpose+'\n'
+            body+='<li><a href="'+href+'">'+html.escape(name)+'</a> — '+html.escape(purpose)+'</li>'
+        md+='\n';body+='</ul>'
     for g in layout['groups']:
         md+='## '+g['name']+'\n\n'+g['purpose']+'\n\n';body+='<h2>'+html.escape(g['name'])+'</h2><p>'+html.escape(g['purpose'])+'</p>'
         if layout.get('public_navigation'):
@@ -194,7 +214,9 @@ def apply(root,clean_cache=False):
         if hasattr(os,'chflags'):
             for p in original:
                 if p.name.startswith('.'):continue
-                os.chflags(p,changes['flags'][p.name]|stat.UF_HIDDEN,follow_symlinks=False)
+                flags=changes['flags'][p.name]
+                flags=flags & ~stat.UF_HIDDEN if p.name in layout.get('root_visible_files',[]) else flags | stat.UF_HIDDEN
+                os.chflags(p,flags,follow_symlinks=False)
         if clean_cache:
             candidates=cache_candidates(root)
             with zipfile.ZipFile(backup/'removed-cache.zip','w',zipfile.ZIP_DEFLATED) as z:
