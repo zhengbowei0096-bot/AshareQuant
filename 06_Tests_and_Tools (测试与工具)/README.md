@@ -34,6 +34,7 @@ Public source and documentation only. Local runtime records remain on your compu
 | [tests/test_layout.py](../tests/test_layout.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_lifecycle.py](../tests/test_lifecycle.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_mac_alerts.py](../tests/test_mac_alerts.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
+| [tests/test_model_activity.py](../tests/test_model_activity.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_model_candidates.py](../tests/test_model_candidates.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_model_monitor.py](../tests/test_model_monitor.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_next_session_plan.py](../tests/test_next_session_plan.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
