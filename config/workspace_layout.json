@@ -2038,5 +2038,10 @@
       "verify_models.py",
       "verify_risk_models.py"
     ]
-  }
+  },
+  "root_visible_files": [
+    "README.md",
+    "requirements.txt",
+    "AGENTS.md"
+  ]
 }
