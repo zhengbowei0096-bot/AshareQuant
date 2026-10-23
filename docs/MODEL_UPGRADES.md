@@ -33,3 +33,20 @@ Back up source and SQLite databases before deployment. A reviewed implementation
 ## Verification (验证)
 
 Tests cover sub-2% trials, separate slots, recent deterioration, per-horizon sample budgets, repeated-trial correction, immutable records, future/backdated data, missing cohort records, no early final-test peeking, trial withdrawal, source/config/code identity, and actual causal fitting with the original estimator. These software tests use isolated fixtures; only future collected market outcomes can establish independent model acceptance.
+
+
+## Model training and validation page (模型训练与验证专栏)
+
+The daily overview links to `reports/iteration/latest/index.html`; detailed model tables appear only on this dedicated page. Its three panels work locally without JavaScript or a network request:
+
+| Panel | What the report establishes | What it does not establish |
+|---|---|---|
+| Daily training (每日训练) | Checksum-verified sealed research predictions, final fitted weights/normalization, original feature inputs, saved recipe, last mature label date, and daily stock/horizon coverage | Search counts and validation folds are not extra completed daily models. Configured sample limits are not measured training counts. |
+| Research trial (研究试用) | Separately lists current eligibility, actual trial use in the latest sealed predictions, and trial use in the exact sealed payload referenced by the intraday source file | Eligibility does not mean adoption. A source file is not proof of successful live inference or a trade. |
+| Independent acceptance (独立验收) | Prospective outcomes versus required origins, earliest supported date, failure/waiting reasons | A pending cohort does not imply that daily training has stopped. Historical screening does not prove future performance. |
+
+The training reader opens the research database read-only and verifies stored digests. It excludes future data dates, rejects future training labels and incomplete or non-finite fitted parameters, and does not create a missing database. Older recipes are resolved only against their saved version; missing metadata remains explicitly unknown. Existing records do not contain the final training sample count/start date, so the page explains this limitation instead of displaying the configured cap as an actual count.
+
+The current intraday source may still contain the previous close's model while newer daily forecasts exist. Both dates are shown. The normal intraday freshness checks decide whether that source is usable; this report neither bypasses those checks nor switches models. Refreshing this page cannot retrain, activate a candidate, reset validation, alter a ledger, or replace sealed predictions. Historical report exports remain preserved in backups; the newest presentation is refreshed at daily export.
+
+Read the recent data date first, then the training results, then actual trial adoption. The three panels explain different stages of the same workflow, not three separate accounts. (先核对日期；已训练、获准试用、实际采用、独立验收通过是不同状态。)
