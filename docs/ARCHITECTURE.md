@@ -68,3 +68,11 @@ Root presentation is controlled by `root_visible_files` in the same layout. The 
 ## Root utilities cleanup (根目录工具整理，2026-10-23)
 
 Four redundant root launchers were removed after checking source imports, local task scripts and service arguments. `asharequant.cli check` and `asharequant.cli run` remain the supported entry points. The comparison launcher and three historical acceptance scripts moved byte-for-byte to `tools/`; execute them as modules from the project root. These acceptance scripts retain their historical assumptions and side effects. Three environment snapshots moved unchanged to `config/environments/`; the source archive pattern includes their new location. No model or execution fingerprint inputs changed. See the maintenance tools section in [README](../README.md).
+
+## Execution repair boundaries (执行修复边界)
+
+`intraday.target_shares` 为委托生成与 `order_engine.fill_order` 提供同一整手换算：只在整手边界的四个浮点最小间距（ULP）以内纠正数值噪声，真实低于边界的目标仍向下取整。没有新增可调风险容忍度。
+
+`intraday_inference.model_snapshot` 根据预测中既有 `data_versions` 读取 `data/normalized/<symbol>/versions/<version>/`，复用原数据验证函数，校验元数据身份、两个CSV的SHA-256及获取时间。`infer_frame` 的特征、系数、概率校准和预测公式未修改。
+
+`dynamic_service.reviewed_code` 从初始代码版本沿追加的 `execution_upgrades` 审核链核对当前代码。初始元数据、账户状态及历史成交不重写；共享股数换算文件也纳入执行指纹。缺失、篡改、未经审核的版本仍停止运行。
