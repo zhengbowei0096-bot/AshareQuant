@@ -17,7 +17,7 @@ def enabled(root):
 
 def implementation():
  # This epoch must stop on changes to any function contributing predictions or fills.
- names=('research_policy.py','research_execution.py','research_paper.py','forecast.py','seven_metrics.py','probability_calibration.py','decision.py','execution_replay.py','paper_account.py','connections.py')
+ names=('slot_upgrade.py','research_policy.py','research_execution.py','research_paper.py','forecast.py','seven_metrics.py','probability_calibration.py','decision.py','execution_replay.py','paper_account.py','connections.py')
  return hashlib.sha256(b''.join((Path(__file__).parent/n).read_bytes() for n in names)).hexdigest()
 
 
@@ -49,6 +49,8 @@ def forecast_candidate(snap,cal,day,h,cfg,candidate):
 
 def predict_day(root,cal,day,spec):
  watch=read_watchlist(root);base=load_config(root);rows=[];oos=[];versions={}
+ from .slot_upgrade import registry,choice
+ upgrades=registry(root)
  if watch.symbol.tolist()!=spec['universe']:raise ValueError('RESEARCH_UNIVERSE_CHANGED_REQUIRES_NEW_EPOCH')
  for item in watch.itertuples():
   snap=read_snapshot(root,item.symbol)
@@ -58,7 +60,13 @@ def predict_day(root,cal,day,spec):
   if not q['fresh'] or not q['calendar_complete']:raise ValueError('RESEARCH_DATA_INCOMPLETE:'+item.symbol)
   forecasts={}
   for h in (1,5,20):
-   f,o=forecast_candidate(snap,cal,day,h,spec['forecast_config'],spec['candidate']);forecasts[str(h)]=f
+   candidate,upgrade=choice(upgrades,item.symbol,h,spec['candidate'])
+   f,o=forecast_candidate(snap,cal,day,h,spec['forecast_config'],candidate)
+   f['model_features']=candidate['features']
+   if upgrade:
+    f['prediction_upgrade']=upgrade
+    f['model_status']='RESEARCH_TRIAL' if upgrade['scope']=='RESEARCH_TRIAL_ONLY' else 'PREDICTIVE_PROCEDURE_VALIDATED_RESEARCH_EXECUTION'
+   forecasts[str(h)]=f
    o['symbol']=item.symbol;o['horizon']=h;oos.append(o)
   rows.append(dict(symbol=item.symbol,name=item.name,sector=spec['forecast_config']['sector_groups'].get(item.symbol,item.sector),close=float(snap['raw'].close.iloc[-1]),last_date=day,
    price_source=snap['meta']['source'],price_fetched_at=snap['meta']['fetched_at'],forecasts=forecasts,data_eligible=bool(rule_for(item.symbol) and not any(t in item.name.upper() for t in ('ST','退')) and snap['raw'].volume.iloc[-1]>0 and snap['raw'].amount.tail(20).mean()>=base['min_average_amount'])))
@@ -160,8 +168,13 @@ def run(root):
     nav=get(old,'nav');oldmeta=get(old,'meta')['account'];oldobs=get(old,'observations')
    if day not in nav or day not in oldobs:raise ValueError('SAME_DAY_SETTLED_PAPER_ANCHOR_REQUIRED')
    latest=nav[day];study=json.loads((root/'reports/iteration/latest.json').read_text());studies=[x for x in study['studies'] if not x.get('errors') and finite(x.get('mean_gain'))]
-   if not studies or study['asof']!=day:raise ValueError('CURRENT_CANDIDATE_RESEARCH_REQUIRED')
-   chosen=max(studies,key=lambda x:x['mean_gain']);candidate=chosen['candidate']
+   if study['asof']!=day:raise ValueError('CURRENT_CANDIDATE_RESEARCH_REQUIRED')
+   if study.get('version')=='slot-v2':
+    candidate=dict(alpha=FORECAST_DEFAULTS['ridge_alpha'],features=FEATURES)
+    chosen=dict(candidate=candidate,mean_gain=None,basis='BASELINE_WITH_SEPARATE_SLOT_TRIALS')
+   else:
+    if not studies:raise ValueError('CURRENT_CANDIDATE_RESEARCH_REQUIRED')
+    chosen=max(studies,key=lambda x:x['mean_gain']);candidate=chosen['candidate']
    if candidate['alpha'] not in (1.,10.,100.) or not candidate['features'] or not set(candidate['features'])<=set(FEATURES):raise ValueError('UNKNOWN_RESEARCH_CANDIDATE')
    cfg={**FORECAST_DEFAULTS,**json.loads((root/'forecast_config.json').read_text())}
    spec=dict(candidate=candidate,selected_at=at.isoformat(),selected_asof=day,selection_basis='用户授权研究模拟；历史搜索最高改善候选，仅探索，未通过正式筛选',historical_study=chosen,
@@ -174,7 +187,7 @@ def run(root):
     original_initial_equity=oldmeta['initial_equity'],prior_ledger=[nav[k] for k in sorted(nav)],config=oldmeta['config'],engine_version=engine_version(),model_version=spec['version'],mode='RESEARCH_PAPER_ONLY')
    put(db,'spec','active',spec);put(db,'meta','account',meta)
   else:spec=get(db,'spec_revisions').get('v2',specs['active']);meta=get(db,'meta_revisions').get('v2',metas['account'])
-  if spec['implementation']!=implementation() or meta['engine_version']!=engine_version():raise ValueError('RESEARCH_IMPLEMENTATION_CHANGED_REQUIRES_REVIEW')
+  if reviewed_implementation(db,spec)!=implementation() or meta['engine_version']!=engine_version():raise ValueError('RESEARCH_IMPLEMENTATION_CHANGED_REQUIRES_REVIEW')
   current={**DEFAULTS,**json.loads((root/'decision_config.json').read_text())};load_fee_config(root,current)
   for k,v in meta['config'].items():
    if k in current and current[k]!=v:raise ValueError('RESEARCH_FROZEN_CONFIG_CHANGED:'+k)
@@ -295,3 +308,30 @@ def activate_policy(root,expected_implementation,authorization):
   put(db,'revision_audit','v2',dict(at=at.isoformat(),authorization=authorization,old_spec_sha=digest(old),old_meta_sha=digest(meta),new_spec_sha=digest(new),new_plan_sha=digest(plan),unchanged_prediction_sha=digest(payload),effective_session=plan['target_session']))
   db.commit()
  return {'version':new['version'],'effective_session':plan['target_session'],'old_plan_preserved':True,'formal_model_changed':False}
+
+
+def reviewed_implementation(db,spec):
+ current=spec['implementation']
+ for key,review in sorted(get(db,'implementation_reviews').items()):
+  if review['from']!=current or review['spec_sha']!=digest(spec):raise ValueError('RESEARCH_REVIEW_CHAIN_INVALID')
+  current=review['to']
+ return current
+
+
+def approve_implementation(root,expected,validation_sha,reason):
+ """Explicit maintenance review; no frozen predictions, plans or ledger rewrites."""
+ import re
+ from .core import run_lock
+ if not reason.strip() or not re.fullmatch('[a-f0-9]{64}',validation_sha):raise ValueError('MAINTENANCE_PROOF_REQUIRED')
+ root=Path(root)
+ with run_lock(root),sqlite3.connect(root/'data/research_paper.sqlite3') as db:
+  db.execute('BEGIN IMMEDIATE')
+  spec=get(db,'spec_revisions').get('v2',get(db,'spec')['active'])
+  current=reviewed_implementation(db,spec)
+  if current!=expected:raise ValueError('RESEARCH_REVIEW_BASE_MISMATCH')
+  if current==implementation():return {'status':'ALREADY_REVIEWED'}
+  key=f"{len(get(db,'implementation_reviews'))+1:012d}"
+  review=dict(at=now().isoformat(),from_code=current,to_code=implementation(),spec_sha=digest(spec),validation_sha=validation_sha,reason=reason)
+  review['from']=review.pop('from_code');review['to']=review.pop('to_code')
+  put(db,'implementation_reviews',key,review)
+ return dict(status='REVIEW_RECORDED',revision=key)

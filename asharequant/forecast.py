@@ -278,6 +278,8 @@ def generate(root):
     quote_map=quotes(root,base,watch.symbol.tolist(),end,cal,offline=True)
     from .lifecycle import refresh_registry,load_prediction,record_live
     production_registry=refresh_registry(root)
+    from .slot_upgrade import registry as slot_registry, choice as slot_choice
+    slot_state=slot_registry(root)
     rows,errors,versions,oos = [],[],{},[]
     for item in watch.itertuples():
         try:
@@ -305,7 +307,14 @@ def generate(root):
                 else:
                     from .model_candidates import selected
                     chosen=selected(root,item.symbol,horizon,input_version=snap['meta']['version'],asof=str(latest.date()))
-                    forecasts[str(horizon)], frame=forecast_one(snap,cal,end,horizon,cfg,model_name=chosen)
+                    recipe,upgrade=slot_choice(slot_state,item.symbol,horizon,None)
+                    if upgrade:
+                        from .research_paper import forecast_candidate
+                        forecasts[str(horizon)],frame=forecast_candidate(snap,cal,str(latest.date()),horizon,cfg,recipe)
+                        forecasts[str(horizon)].update(prediction_upgrade=upgrade,model_features=recipe['features'],
+                            model_status='RESEARCH_TRIAL' if upgrade['scope']=='RESEARCH_TRIAL_ONLY' else 'PREDICTIVE_PROCEDURE_VALIDATED_RESEARCH_EXECUTION')
+                    else:
+                        forecasts[str(horizon)], frame=forecast_one(snap,cal,end,horizon,cfg,model_name=chosen)
                     frame['symbol']=item.symbol;frame['horizon']=horizon;oos.append(frame)
             rows.append(dict(symbol=item.symbol,name=item.name,sector=getattr(item,'sector','未分类'),
                              close=float(snap['raw'].close.iloc[-1]),last_date=str(latest.date()),

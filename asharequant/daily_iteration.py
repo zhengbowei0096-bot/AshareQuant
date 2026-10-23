@@ -108,7 +108,7 @@ def decision(asof, at, checkpoint, pending, errors, new_ids):
     return 'DAILY_MATURED_OUTCOMES'
 
 
-def run(root):
+def legacy_run(root):
     from .data import calendar
     root=Path(root);at=quality.aware(now());end=cutoff(at.to_pydatetime())
     sessions,_=calendar(root,load_config(root),end,offline=True)
@@ -194,3 +194,9 @@ def run(root):
     atomic_text(folder/'index.html',page)
     atomic_text(root/'reports/iteration/latest/index.html',page)
     return report
+
+
+def run(root):
+    """Current slot policy; legacy checkpoints and experiments remain unchanged."""
+    from .slot_upgrade import run as run_slots
+    return run_slots(root)

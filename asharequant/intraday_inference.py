@@ -85,7 +85,8 @@ def dynamic_plan(root, source, state, quotes, checks, cal, at):
         q=quotes[k];row['close']=q['price'];row['price_source']=q['source'];row['price_fetched_at']=q['asof']
         audit[k]={'history':dict(version=snap['meta']['version'],sha256=snap['meta']['sha256'],fetched_at=snap['meta']['fetched_at'])}
         for h,f in row['forecasts'].items():
-            y,e=infer_frame(snap['hfq'],snap['raw'],q,cal,columns,f,at);delta=y-f['predicted_return'];f['predicted_return']=y
+            model_columns=f.get('model_features',columns)
+            y,e=infer_frame(snap['hfq'],snap['raw'],q,cal,model_columns,f,at);delta=y-f['predicted_return'];f['predicted_return']=y
             f['interval80_empirical']=[v+delta for v in f['interval80_empirical']]
             f['volatility_horizon']=e['vol20']*math.sqrt(f['horizon']);f['downside_es95_normal_proxy']=min(0.,y-2.063*f['volatility_horizon'])
             calibration=f.get('probability_calibration',{})
