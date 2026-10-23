@@ -384,7 +384,7 @@
         {
           "target": "asharequant/reporting/plain_chinese.py",
           "label": "plain_chinese.py",
-          "purpose": "Reporting module: reporting/plain_chinese.py (报告中文阅读层：解释状态、生成附件阅读表格，将旧空收益入口改为同一归档的动态主账户结算，说明缺项；检查本地链接。)",
+          "purpose": "Reporting module: plain_chinese.py (报告中文阅读层，解释委托撤销、数据快照及模型校验状态；不改变原始数值与记录。)",
           "subfolder": "Implementation and Guides (功能与使用说明)"
         },
         {
@@ -487,7 +487,7 @@
         {
           "target": "asharequant/intraday_inference.py",
           "label": "01_intraday_inference.py",
-          "purpose": "Prediction module: intraday_inference.py (复用已保存模型系数，对当时未完成日线进行研究推理；原预测评分不变，盘中效果未独立验证。)",
+          "purpose": "Prediction module: intraday_inference.py (读取模型绑定的不可变历史快照，核验版本、哈希与可用时间；复用原系数和公式进行盘中研究推理。)",
           "subfolder": "02_Prediction (预测与评分)"
         },
         {
@@ -589,7 +589,7 @@
         {
           "target": "asharequant/order_engine.py",
           "label": "05_order_engine.py",
-          "purpose": "Execution and Ledger module: order_engine.py (动态模拟委托生命周期、后续报价撮合、T+1、资金预留、部分成交费用及阶段盈亏；无真实券商通道。)",
+          "purpose": "Execution and Ledger module: order_engine.py (动态模拟委托、稳定整手换算、后续报价撮合、T+1、费用及盈亏；无真实券商通道。)",
           "subfolder": "04_Execution_and_Ledger (执行与记账)"
         },
         {
@@ -601,7 +601,7 @@
         {
           "target": "asharequant/intraday.py",
           "label": "07_intraday.py",
-          "purpose": "Execution and Ledger module: intraday.py (盘中对照盯盘与独立模拟账户：交易时段轮询、提醒、模拟处理和收盘结算。)",
+          "purpose": "Execution and Ledger module: intraday.py (盘中对照执行；提供仅修正浮点误差的统一整手股数换算，保留交易与风险条件。)",
           "subfolder": "04_Execution_and_Ledger (执行与记账)"
         },
         {
@@ -691,7 +691,7 @@
         {
           "target": "asharequant/reporting/plain_chinese.py",
           "label": "01_reporting__plain_chinese.py",
-          "purpose": "Reporting module: reporting/plain_chinese.py (报告中文阅读层：解释状态、生成附件阅读表格，将旧空收益入口改为同一归档的动态主账户结算，说明缺项；检查本地链接。)",
+          "purpose": "Reporting module: plain_chinese.py (报告中文阅读层，解释委托撤销、数据快照及模型校验状态；不改变原始数值与记录。)",
           "subfolder": "06_Reporting (报告展示)"
         },
         {
@@ -727,7 +727,7 @@
         {
           "target": "asharequant/dynamic_service.py",
           "label": "01_dynamic_service.py",
-          "purpose": "Operations module: dynamic_service.py (每30秒行情驱动模拟服务、研究推理、订单账本、收盘结算、报告和手动账户差异核对；只模拟。)",
+          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。)",
           "subfolder": "07_Operations (自动运行)"
         },
         {
@@ -1230,7 +1230,7 @@
         {
           "target": "asharequant/order_engine.py",
           "label": "order_engine.py",
-          "purpose": "Execution and Ledger module: order_engine.py (动态模拟委托生命周期、后续报价撮合、T+1、资金预留、部分成交费用及阶段盈亏；无真实券商通道。)",
+          "purpose": "Execution and Ledger module: order_engine.py (动态模拟委托、稳定整手换算、后续报价撮合、T+1、费用及盈亏；无真实券商通道。)",
           "subfolder": "Implementation and Guides (功能与使用说明)"
         },
         {
@@ -1545,7 +1545,7 @@
         {
           "target": "asharequant/dynamic_service.py",
           "label": "dynamic_service.py",
-          "purpose": "Operations module: dynamic_service.py (每30秒行情驱动模拟服务、研究推理、订单账本、收盘结算、报告和手动账户差异核对；只模拟。)",
+          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。)",
           "subfolder": "Implementation and Guides (功能与使用说明)"
         },
         {
@@ -1596,6 +1596,12 @@
           "label": "verify_risk_models.py",
           "purpose": "Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。)",
           "subfolder": "Validation_Tools (对比与验收)"
+        },
+        {
+          "target": "tests/test_execution_regressions.py",
+          "label": "Execution_Regression_Tests.py",
+          "subfolder": "Regression_Tests (回归测试)",
+          "purpose": "Synthetic tests for lot rounding, immutable model history, time guards and append-only execution upgrades. (股数取整、历史快照、时间校验与追加升级审核测试。)"
         },
         {
           "target": "tests",
@@ -1972,6 +1978,7 @@
       "tests/test_database.py",
       "tests/test_decision.py",
       "tests/test_dynamic_execution.py",
+      "tests/test_execution_regressions.py",
       "tests/test_factor_research.py",
       "tests/test_factors.py",
       "tests/test_forecast.py",
