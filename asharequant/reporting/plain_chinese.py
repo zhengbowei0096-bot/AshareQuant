@@ -5,7 +5,33 @@ from urllib.parse import urlsplit,unquote,quote
 from bs4 import BeautifulSoup
 from ..core import atomic_text
 
-WORDS = dict(x.split('=',1) for x in '''RESEARCH_TRIAL=研究试用，独立验证尚未完成
+WORDS = dict(x.split('=',1) for x in '''DECISION_TIME_INVALID=判断或模型记录时间不符合先后顺序
+NO_RECORDED_DECISIONS=本轮未生成动态判断明细
+DECISION_COVERAGE_INCOMPLETE=动态判断未覆盖完整观察池
+MODEL_EVIDENCE_INCOMPLETE=缺少完整模型计算证据
+DECISION_EVIDENCE_UNVERIFIED=动态判断记录无法读取或完整性校验未通过
+WAITING=等待首次有效盘中记录
+BLOCKED=动态判断受阻，尚未确认恢复
+RECOVERED=最近盘中记录已确认恢复
+AVAILABLE=最近盘中记录已有完整判断
+EVIDENCE_UNVERIFIED=证据无法核验
+OBSERVE_ONLY=当前只观察，未进入连续交易时段
+QUOTE_SOURCE_UNAVAILABLE=行情来源暂不可用
+QUOTE_STALE_OR_FUTURE=行情时间过期或晚于判断时间
+QUOTE_INVALID=行情数值缺失或无效
+REFERENCE_STALE=当日交易参考资料过期
+SUSPENSION_EVIDENCE_STALE=停牌核查资料缺失或过期
+BOOK_INVALID=买卖盘价格或数量无效
+LIMIT_LOCK_OR_CONFLICT=触及涨跌停或涨跌停参考不一致
+PARTIAL_BAR_UNVERIFIED=当日未收盘行情未通过校验
+PREVIOUS_CLOSE_MODEL_NOT_AVAILABLE=上一交易日模型报告尚不可用或时间不合规
+FROZEN_CALIBRATOR_REQUIRED=模型缺少可复用的已保存概率校准参数
+INTRADAY_FEATURE_MISSING=盘中特征缺失，无法完成推理
+PRIOR_SESSION_HISTORY_REQUIRED=缺少截至上一交易日的历史行情
+MODEL_SNAPSHOT_STALE_OR_FUTURE=模型快照过期或晚于当前时点
+FROZEN_PARAMETERS_INVALID=已保存模型参数未通过有效性检查
+MODEL_LABEL_NOT_MATURE_BEFORE_SESSION=模型训练使用的标签在开盘前尚未到期
+RESEARCH_TRIAL=研究试用，独立验证尚未完成
 PREDICTIVE_PROCEDURE_VALIDATED_RESEARCH_EXECUTION=预测方案通过独立验证，交易仍为研究模拟
 RESEARCH_TRIAL_ONLY=仅研究试用
 PREDICTION_RECIPE_ONLY=仅预测方案验证通过
@@ -113,7 +139,21 @@ ridge=岭回归模型
 garch=条件波动率模型
 tencent=腾讯行情
 sina=新浪行情'''.splitlines())
-FIELDS=dict(x.split('=',1) for x in '''id=记录编号
+FIELDS=dict(x.split('=',1) for x in '''decision_diagnostic=动态判断异常与恢复
+state=判断状态
+service_status=服务状态
+latest_attempt_at=最近盘中尝试时间
+last_success_at=最近成功判断时间
+last_failure_at=最近异常时间
+last_failure_reason=最近异常原因
+recovered_at=恢复确认时间
+expected_stocks=观察池股票数
+decision_stocks=本轮判断覆盖股票数
+quote_problems=最近行情检查问题
+reasons=具体原因
+model_at=模型计算时间
+last_decision_at=完整判断记录时间
+id=记录编号
 status=状态
 asof=数据日期
 date=日期
