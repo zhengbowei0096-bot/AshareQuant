@@ -15,7 +15,8 @@ REASONS={
 
 def time_text(value):
     if not value:return '尚不能确定'
-    return pd.Timestamp(value).tz_convert('Asia/Shanghai').strftime('%Y-%m-%d %H:%M:%S（北京时间）')
+    # macOS strftime can return an empty string for non-ASCII format literals.
+    return pd.Timestamp(value).tz_convert('Asia/Shanghai').strftime('%Y-%m-%d %H:%M:%S')+'（北京时间）'
 
 
 def percent(value):return '无法评估' if value is None else f'{value:.2%}'
