@@ -13,7 +13,7 @@ Scheduling and diagnostics code is included. Services must be installed locally;
 | [asharequant/cli.py](../asharequant/cli.py) | Operations module: cli.py (统一命令入口：分派 run、daily、forecast、decision、paper-account 等任务。) |
 | [asharequant/daily.py](../asharequant/daily.py) | Operations module: daily.py (每日工作流水线：依次组织数据、分析、模拟账本、模型评估、验证和检查；记录步骤状态。) |
 | [asharequant/scheduler.py](../asharequant/scheduler.py) | Operations module: scheduler.py (本地定时服务唤醒后的检查器：按北京时间和交易日判断是否应运行，记录尝试及结果；不能自行唤醒关机电脑。) |
-| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (每30秒行情驱动模拟服务、研究推理、订单账本、收盘结算、报告和手动账户差异核对；只模拟。) |
+| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) |
 | [asharequant/mac_alerts.py](../asharequant/mac_alerts.py) | Operations module: mac_alerts.py (独立无声 Mac 弹窗：仅提醒服务异常及恢复，交易事件不弹窗；不调用模型、不修改账本。) |
 | [asharequant/evaluation/connection_health.py](../asharequant/evaluation/connection_health.py) | Validation module: evaluation/connection_health.py (汇总数据连接及无人值守流程准备状态，保存检查证据。) |
 | [docs/DYNAMIC_EXECUTION.md](../docs/DYNAMIC_EXECUTION.md) | Dynamic paper execution, prerequisites and limitations. (动态模拟执行、运行前提与限制。) |
