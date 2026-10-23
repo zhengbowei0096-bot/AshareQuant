@@ -21,6 +21,7 @@ Public source and documentation only. Local runtime records remain on your compu
 | [tests/test_database.py](../tests/test_database.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_decision.py](../tests/test_decision.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_dynamic_execution.py](../tests/test_dynamic_execution.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
+| [tests/test_dynamic_status.py](../tests/test_dynamic_status.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_factor_research.py](../tests/test_factor_research.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_factors.py](../tests/test_factors.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_forecast.py](../tests/test_forecast.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
