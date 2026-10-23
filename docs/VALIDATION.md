@@ -101,3 +101,13 @@ python -m unittest discover -s tests -p 'test_execution_regressions.py' -v
 ```
 
 原训练、特征、预测、概率校准、策略和风险参数没有修改。另在本地对保存的实际行情做只读回放并核对原参数公式；私人行情明细、账本、配置和回放结果不发布。未进行真实券商成交验收，也未证明下一交易时段会通过全部行情或公司行为校验；此类数据门槛保持原样。
+
+## Daily model research and progress report — 2026-10-23
+
+460 automated tests passed, including 15 new checks for same-session deduplication, new mature outcomes, future-confirmation rejection, primary-issuance counting, data-error recovery, frozen-experiment preservation, interrupted candidate preparation, checkpoint tampering, report empty states and localized Beijing timestamps on macOS. Original candidate search, feature/prediction formulas, independent acceptance gates and risk settings are unchanged. Tests of the scheduler use isolated fixtures; they do not establish a candidate's predictive advantage or formal eligibility.
+
+Run `python -m unittest discover -s tests -q` to repeat regression checks. Run `python -m asharequant.cli iteration --root .` to evaluate locally available real evidence under the same exclusive update lock. It writes a new research snapshot and progress page, never replaces historical reports or account records. Completed daily checkpoints are checksum-verified; do not edit them to force a second search. Repeated same-day runs reuse results and may resume candidate preparation.
+
+For rollback, restore the previous CLI/report sources and navigation from the deployment backup under the update lock; retain new study checkpoints and immutable lifecycle evidence. If an experiment has been frozen, preserve its parameters, version and pending-validation state. No automatic rollback of forecasts, fills or account ledgers is performed.
+
+A local run on confirmed market evidence completed the original candidate comparison. A second check on the same session reused the checksum-identical study. No candidate qualified for a formal upgrade. Account records and the current account projection were unchanged; existing frozen research records were preserved. This was a research/report verification, not a rerun of the entire daily pipeline or live trading validation.

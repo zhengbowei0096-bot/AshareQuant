@@ -76,3 +76,13 @@ Four redundant root launchers were removed after checking source imports, local 
 `intraday_inference.model_snapshot` 根据预测中既有 `data_versions` 读取 `data/normalized/<symbol>/versions/<version>/`，复用原数据验证函数，校验元数据身份、两个CSV的SHA-256及获取时间。`infer_frame` 的特征、系数、概率校准和预测公式未修改。
 
 `dynamic_service.reviewed_code` 从初始代码版本沿追加的 `execution_upgrades` 审核链核对当前代码。初始元数据、账户状态及历史成交不重写；共享股数换算文件也纳入执行指纹。缺失、篡改、未经审核的版本仍停止运行。
+
+## Daily research orchestration (每日研究调度)
+
+`daily_iteration.py` is the current `iteration` CLI and daily `run` entry. It reuses `iteration.select_candidate`, the original feature construction, drift tests and `lifecycle` acceptance/promotion functions without editing their fingerprint-bound files. `iteration.py` keeps its historical 30/90-day entry for frozen-version compatibility; the CLI uses the new daily scheduler.
+
+Before a study, the prediction-quality ledger confirms mature outcomes using real, time-checked snapshots. Only first daily issuances count as new outcomes; reruns remain evidence but do not inflate sample counts. No new outcomes, input errors or an active future-test candidate defer new tuning. All available mature historical labels can train the original candidate family; future/unconfirmed labels cannot. Candidate parameters are selected by the unchanged paired time-series validation, not by the descriptive quality summary alone.
+
+A completed study is saved in `data/iteration/daily_studies/<session>.json` before candidate preparation, allowing an interrupted preparation to resume without searching twice. The scheduler records its own SHA-256 separately from the unchanged model runtime fingerprint. State points to immutable prospective experiments; unknown/changed experiments are retained and reported as errors, never silently discarded. A new snapshot and latest progress page are written; existing research archives and account ledgers are not rewritten. `reporting/iteration_status.py` presents current progress separately from the last completed study.
+
+The next daily check is 18:00 on the next verified exchange session. A next research date is conditional on new confirmed outcomes and complete inputs. While independent validation is pending, only its next check time is known; a new-study date is not promised. The existing daily service, lifecycle collection schedule and risk settings are unchanged.
