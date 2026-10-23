@@ -231,8 +231,8 @@
         },
         {
           "target": "reports/iteration",
-          "label": "Model_Iteration (模型迭代)",
-          "purpose": "Saved report or diagnostic evidence; read its timestamp. (保存的报告或诊断证据，请核对日期。)",
+          "label": "Model_Training_and_Validation (模型训练与验证)",
+          "purpose": "Dedicated daily training, research adoption and independent acceptance panels; overview keeps a link only. (专栏分开显示每日训练、研究试用与独立验收，首页只留入口。)",
           "subfolder": "Validation_and_Research (验证与研究)"
         },
         {
@@ -709,13 +709,19 @@
         {
           "target": "asharequant/reporting/daily_bundle.py",
           "label": "03_reporting__daily_bundle.py",
-          "purpose": "Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。)",
+          "purpose": "Daily report delivery, verified account returns and dedicated model-activity link; preserves earlier exports in backups. (每日交付与已结算收益，首页仅链接模型专栏，旧报告保留备份。)",
           "subfolder": "06_Reporting (报告展示)"
         },
         {
           "target": "asharequant/reporting/iteration_status.py",
           "label": "iteration_status.py",
-          "purpose": "Chinese trial/validation status, previous study, wait reasons and per-slot progress. (中文试用与验证、上次研究、等待原因及分组进度。)",
+          "purpose": "Current model-activity presentation entry and legacy study status. (当前模型活动专栏入口与旧研究状态兼容展示。)",
+          "subfolder": "06_Reporting (报告展示)"
+        },
+        {
+          "target": "asharequant/reporting/model_activity.py",
+          "label": "model_activity.py",
+          "purpose": "Read-only sealed training evidence, actual trial adoption and independent acceptance panels. (只读封存训练证据，分栏显示实际试用和独立验收，不重训或改账本。)",
           "subfolder": "06_Reporting (报告展示)"
         },
         {
@@ -1739,7 +1745,7 @@
         {
           "target": "docs/MODEL_UPGRADES.md",
           "label": "MODEL_UPGRADES.md",
-          "purpose": "Daily research trial, per-slot validation and evidence policy. (每日试用、分组验证与证据说明。)",
+          "purpose": "Research-trial and independent-validation policy, plus separate training/adoption/acceptance report interpretation. (研究试用及独立验证规则，训练、采用与验收专栏解读。)",
           "subfolder": ""
         }
       ],
@@ -1955,6 +1961,7 @@
       "asharequant/reporting/daily_bundle.py",
       "asharequant/reporting/holding_summary.py",
       "asharequant/reporting/iteration_status.py",
+      "asharequant/reporting/model_activity.py",
       "asharequant/reporting/plain_chinese.py",
       "asharequant/reporting/probability_display.py",
       "asharequant/reporting/report.py",
@@ -1969,6 +1976,7 @@
       "asharequant/risk_models.py",
       "asharequant/scheduler.py",
       "asharequant/seven_metrics.py",
+      "asharequant/slot_upgrade.py",
       "asharequant/strategies/__init__.py",
       "asharequant/strategies/next_session_plan.py",
       "asharequant/strategy_experiment.py",
@@ -1998,6 +2006,7 @@
       "docs/DYNAMIC_EXECUTION.md",
       "docs/FILE_GUIDE.html",
       "docs/FILE_GUIDE.md",
+      "docs/MODEL_UPGRADES.md",
       "docs/SECURITY.md",
       "docs/VALIDATION.md",
       "docs/WORKSPACE_LAYOUT.md",
@@ -2031,6 +2040,7 @@
       "tests/test_layout.py",
       "tests/test_lifecycle.py",
       "tests/test_mac_alerts.py",
+      "tests/test_model_activity.py",
       "tests/test_model_candidates.py",
       "tests/test_model_monitor.py",
       "tests/test_next_session_plan.py",
@@ -2044,6 +2054,7 @@
       "tests/test_risk_control.py",
       "tests/test_risk_models.py",
       "tests/test_seven_metrics.py",
+      "tests/test_slot_upgrade.py",
       "tests/test_strategy_experiment.py",
       "tests/test_strict_validation.py",
       "tests/test_system.py",
@@ -2054,10 +2065,7 @@
       "tools/verify_factors.py",
       "tools/verify_models.py",
       "tools/verify_risk_models.py",
-      "tools/verify_stage1.py",
-      "asharequant/slot_upgrade.py",
-      "tests/test_slot_upgrade.py",
-      "docs/MODEL_UPGRADES.md"
+      "tools/verify_stage1.py"
     ]
   },
   "root_visible_files": [
