@@ -119,7 +119,7 @@ def snapshot(db, universe, checked_at, service_status):
                     decision_stocks=len({r['symbol'] for r in result.get('decision_rows', [])}))
         record = json.loads(db.execute("SELECT body FROM records WHERE kind='cycles' AND key=?", (key,)).fetchone()[0])
         info['quote_problems'] = [dict(symbol=k, name=universe.get(k,k),
-                                     reasons=[explanation(x, universe) for x in reasons])
+                                     reasons=[explanation(x, universe) for x in dict.fromkeys(reasons)])
                                   for k, reasons in record.get('checks', {}).items() if reasons]
         if failure:
             info.update(last_failure_at=failure[1], last_failure_reason=failure[3])
@@ -147,7 +147,7 @@ def render(info, universe, positions):
     page = '<section id="dynamic-decision-status"><h2>最近动态判断与原排名</h2>'
     page += '<p><strong>' + labels[state] + '</strong></p>'
     page += '<p>服务状态：' + e(translate(info['service_status'])) + '。休市、重启或安装修复不会自动标记动态判断恢复；以下状态以保存的盘中记录为准。</p>'
-    page += '<p>最近盘中尝试：' + e(display_time(info['latest_attempt_at'])) + '；完整判断覆盖：' + str(info['decision_stocks']) + ' / ' + str(info['expected_stocks']) + '只。</p>'
+    page += '<p>最近盘中尝试：' + e(display_time(info['latest_attempt_at'])) + '；判断明细覆盖：' + str(info['decision_stocks']) + ' / ' + str(info['expected_stocks']) + '只。</p>'
     if info.get('reason'):
         page += '<p>本次受阻原因：' + e(explanation(info['reason'], universe)) + '。</p>'
     if info.get('last_failure_at'):

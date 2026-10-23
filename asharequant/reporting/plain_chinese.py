@@ -5,7 +5,19 @@ from urllib.parse import urlsplit,unquote,quote
 from bs4 import BeautifulSoup
 from ..core import atomic_text
 
-WORDS = dict(x.split('=',1) for x in '''DECISION_TIME_INVALID=判断或模型记录时间不符合先后顺序
+WORDS = dict(x.split('=',1) for x in '''INVALID_QUOTE=报价或买卖盘字段缺失、非正数或无效
+STALE_OR_FUTURE_QUOTE=报价过期或晚于判断时间
+LOCKED_LIMIT_OR_INVALID_BOOK=涨跌停限制或买卖盘价格关系异常
+DUPLICATE_OR_REORDERED_QUOTE=报价重复或到达顺序倒置
+ABNORMAL_PRICE_JUMP=价格异常跳变，已暂停使用
+CUMULATIVE_VOLUME_REGRESSION=当日累计成交量倒退，数据需要核对
+QUOTE_PARSE_FAILED=行情字段无法解析
+PRICE_INVALID=最新价格无效
+CURRENT_REFERENCE_MISSING=缺少当日股票交易参考资料
+SECURITY_NOT_SUPPORTED=股票暂不符合当前支持的交易范围
+SUSPENDED_OR_EVENT=股票停牌或存在交易事件
+REFERENCE_INVALID=股票交易参考资料无效
+DECISION_TIME_INVALID=判断或模型记录时间不符合先后顺序
 NO_RECORDED_DECISIONS=本轮未生成动态判断明细
 DECISION_COVERAGE_INCOMPLETE=动态判断未覆盖完整观察池
 MODEL_EVIDENCE_INCOMPLETE=缺少完整模型计算证据
