@@ -4,7 +4,7 @@ import math
 import pandas as pd
 from .decision import costs, sell_quantity, rule_for
 from .active_execution import buy_edge
-from .intraday import transition
+from .intraday import transition, target_shares
 from .paper_account import digest
 
 ACTIVE = {'ACCEPTED', 'PARTIALLY_FILLED'}
@@ -98,7 +98,7 @@ def fill_order(s, o, q, plan, c, cfg, at, sectors):
     remaining=o['quantity']-o['filled'];equity=s['equity'];budget=min(equity,s['previous_close_equity'])
     stop=equity<=cfg['minimum_equity'] or equity/s['peak']-1<=-cfg['maximum_drawdown']
     weight=0. if stop else plan['weights'].get(k,0.)
-    desired=int(weight*equity/q['price'])//100*100
+    desired=target_shares(weight,equity,q['price'])
     delta=desired-p['shares']
     if (side=='BUY' and delta<=0) or (side=='SELL' and delta>=0):
         event(s,o,'CANCELED',at,'SIGNAL_REVERSED_OR_TARGET_REACHED');return

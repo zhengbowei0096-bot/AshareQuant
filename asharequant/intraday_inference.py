@@ -4,9 +4,12 @@ This is explicitly unvalidated research; original published forecasts stay immut
 """
 import copy
 import math
+import json
+import re
+from pathlib import Path
 import numpy as np
 import pandas as pd
-from .core import read_snapshot
+from .core import validate, digest as file_digest
 from .forecast import features_and_labels
 from .decision import covariance
 from .research_policy import targets, POLICY
@@ -38,18 +41,49 @@ def infer_frame(hfq, raw, q, cal, columns, model, at):
     return y,dict(features=dict(zip(columns,map(float,x))),partial_bar=b|{'date':str(b['date'].date())},parameters_sha=digest(params),vol20=float(frame.vol20.iloc[-1]),training_label_end=model['final_training_last_label_end'])
 
 
+def model_snapshot(root, symbol, version, generated_at, at):
+    """Load the immutable history referenced by the frozen model, never latest.
+
+    Refreshing the latest pointer creates a new UUID even for unchanged prices.
+    Its movement must not invalidate, replace or backfill the model's inputs.
+    """
+    if not re.fullmatch(r"[0-9]{6}", symbol) or not isinstance(version, str) or not re.fullmatch(r"[a-f0-9]{32}", version):
+        raise ValueError('INVALID_MODEL_HISTORY_REFERENCE')
+    folder = Path(root) / 'data' / 'normalized' / symbol / 'versions' / version
+    try:
+        meta = json.loads((folder / 'metadata.json').read_text())
+        if meta['version'] != version or meta['symbol'] != symbol:
+            raise ValueError('MODEL_HISTORY_IDENTITY_MISMATCH')
+        fetched = pd.Timestamp(meta['fetched_at'])
+        generated = pd.Timestamp(generated_at)
+        if (fetched.tzinfo is None or generated.tzinfo is None or at.tzinfo is None
+                or pd.isna(fetched) or pd.isna(generated) or pd.isna(at)
+                or fetched > generated or generated > at
+                or meta.get('synthetic') or meta.get('source') != 'tencent'):
+            raise ValueError('HISTORY_NOT_AVAILABLE_AT_MODEL_TIME')
+        result = {'meta': meta}
+        for kind in ('raw', 'hfq'):
+            path = folder / (kind + '.csv')
+            if file_digest(path) != meta['sha256'][kind]:
+                raise ValueError('MODEL_HISTORY_CHECKSUM_FAILED:' + symbol + ':' + kind)
+            result[kind] = validate(pd.read_csv(path), meta['start'], meta['end'])
+        if not result['raw'].date.equals(result['hfq'].date):
+            raise ValueError('MODEL_HISTORY_DATES_MISMATCH')
+        return result
+    except (OSError, KeyError, TypeError) as exc:
+        raise ValueError('MODEL_HISTORY_UNAVAILABLE:' + symbol) from exc
+
+
 def dynamic_plan(root, source, state, quotes, checks, cal, at):
     original=source['predictions'];before=digest(original);day=original['asof']
     if pd.Timestamp(original['generated_at'])>at or pd.Timestamp(day)!=cal[cal<pd.Timestamp(str(at.date()))][-1]:raise ValueError('MODEL_SNAPSHOT_STALE_OR_FUTURE')
     payload=copy.deepcopy(original);columns=source['spec']['candidate']['features'];histories={};audit={};c=source['meta']['config']
     for row in payload['forecasts']:
-        k=row['symbol'];snap=read_snapshot(root,k)
-        if snap is None or pd.Timestamp(snap['meta']['fetched_at'])>at or snap['meta'].get('synthetic'):raise ValueError('HISTORY_NOT_AVAILABLE_AT_DECISION')
-        if snap['meta']['version']!=original['data_versions'][k]:raise ValueError('HISTORY_MODEL_VERSION_MISMATCH')
+        k=row['symbol'];snap=model_snapshot(root,k,original['data_versions'][k],original['generated_at'],at)
         histories[k]=snap['hfq'].set_index('date').close.pct_change(fill_method=None).loc[:day]
         if k not in quotes or checks.get(k):raise ValueError('MODEL_QUOTE_NOT_VALID:'+k)
         q=quotes[k];row['close']=q['price'];row['price_source']=q['source'];row['price_fetched_at']=q['asof']
-        audit[k]={}
+        audit[k]={'history':dict(version=snap['meta']['version'],sha256=snap['meta']['sha256'],fetched_at=snap['meta']['fetched_at'])}
         for h,f in row['forecasts'].items():
             y,e=infer_frame(snap['hfq'],snap['raw'],q,cal,columns,f,at);delta=y-f['predicted_return'];f['predicted_return']=y
             f['interval80_empirical']=[v+delta for v in f['interval80_empirical']]

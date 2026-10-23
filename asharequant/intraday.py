@@ -48,6 +48,19 @@ def initialize(db,source,cfg):
     if meta.get('code')!=code or meta['config']!=source['meta']['config'] or meta['monitor_config']!=cfg:raise ValueError('FROZEN_PAPER_CONFIG_CHANGED_REVIEW_REQUIRED')
     return meta,load_state(db)
 
+def target_shares(weight, equity, price):
+    """Floor to board lots, correcting only round-trip floating point noise.
+
+    Four ULPs cover the weight/value/price arithmetic, not a trading tolerance.
+    Meaningfully below-boundary targets still round down; risk checks remain intact.
+    """
+    shares = weight * equity / price
+    boundary = round(shares / 100) * 100
+    if abs(shares - boundary) <= 4 * math.ulp(shares):
+        shares = float(boundary)
+    return int(shares) // 100 * 100
+
+
 def transition(state,plan,quotes,checks,c,settings,at,sectors):
     """Pure deterministic transition; called in one transaction with quote audit evidence."""
     s=copy.deepcopy(state);fills=[];conditions={};date=str(at.date())
@@ -74,7 +87,7 @@ def transition(state,plan,quotes,checks,c,settings,at,sectors):
     for k in ordered:
         if k not in valid:blocks[k]=checks.get(k,['QUOTE_MISSING']);continue
         q=valid[k];p=s['positions'].setdefault(k,{'shares':0,'sellable':0});weight=0. if stop else target.get(k,0.)
-        desired=int(weight*equity/q['price'])//100*100;delta=desired-p['shares']
+        desired=target_shares(weight,equity,q['price']);delta=desired-p['shares']
         if delta==0:continue
         if s['used_quotes'].get(k)==q['asof']:continue
         side='BUY' if delta>0 else 'SELL'

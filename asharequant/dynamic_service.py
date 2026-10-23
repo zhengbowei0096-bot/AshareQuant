@@ -4,6 +4,7 @@ import copy
 import hashlib
 import html
 import json
+import re
 import sqlite3
 import sys
 import time
@@ -60,9 +61,61 @@ def verify_projection(db,s):
         if digest(proof)!=row[1] or proof['state_sha']!=digest(s):raise ValueError('LEDGER_PROJECTION_TAMPERED')
 
 
+def code_fingerprints():
+    # Include the shared lot conversion used by both proposal and fill checks.
+    return {n:hashlib.sha256((Path(__file__).parent/n).read_bytes()).hexdigest()
+            for n in ('order_engine.py','intraday_inference.py','dynamic_service.py','intraday.py')}
+
+
+def reviewed_code(db, meta):
+    code = meta['code']
+    for revision, review in sorted(get(db, 'execution_upgrades').items()):
+        if (review['from_code'] != code
+                or review['monitor_config_sha'] != digest(meta['monitor_config'])
+                or review['risk_config_sha'] != digest(meta['config'])):
+            raise ValueError('EXECUTION_UPGRADE_CHAIN_INVALID')
+        code = review['to_code']
+    return code
+
+
+def approve_upgrade(root, expected_code, validation_sha, reason):
+    """Explicit, audited maintenance only. Never rewrite meta, state or fills.
+
+    Caller must have reviewed the exact old/new code and completed verification.
+    The ordinary poll path cannot authorize an upgrade by itself.
+    """
+    if not reason.strip() or not re.fullmatch(r'[a-f0-9]{64}', validation_sha):
+        raise ValueError('EXECUTION_UPGRADE_REVIEW_REQUIRED')
+    root = Path(root)
+    with run_lock(root/'logs/dynamic'):
+        at = pd.Timestamp(now())
+        if session(at, days(root)) != 'CLOSED':
+            raise ValueError('EXECUTION_UPGRADE_REQUIRES_CLOSED_SESSION')
+        with db_open(root) as db:
+            db.execute('BEGIN IMMEDIATE')
+            meta = get(db, 'meta')['account'];state = load_state(db)
+            verify_projection(db, state)
+            if meta['monitor_config'] != config(root):
+                raise ValueError('EXECUTION_UPGRADE_CONFIG_CHANGED')
+            if state['day'] != state['closed_day'] or any(o['status'] in ACTIVE for o in state['orders'].values()):
+                raise ValueError('EXECUTION_UPGRADE_REQUIRES_SETTLED_ACCOUNT')
+            previous = reviewed_code(db, meta);current = code_fingerprints()
+            if previous != expected_code:
+                raise ValueError('EXECUTION_UPGRADE_BASE_MISMATCH')
+            if previous == current:
+                return {'status':'ALREADY_REVIEWED'}
+            revision = f"{len(get(db, 'execution_upgrades')) + 1:012d}"
+            review = dict(at=at.isoformat(), from_code=previous, to_code=current,
+                          monitor_config_sha=digest(meta['monitor_config']),
+                          risk_config_sha=digest(meta['config']), state_sha=digest(state),
+                          validation_sha=validation_sha, reason=reason)
+            put(db, 'execution_upgrades', revision, review)
+            return {'status':'UPGRADE_REVIEW_RECORDED','revision':revision,'review_sha':digest(review)}
+
+
 def initialize(root,db,at):
     cfg=config(root);meta=get(db,'meta').get('account')
-    code={n:hashlib.sha256((Path(__file__).parent/n).read_bytes()).hexdigest() for n in ('order_engine.py','intraday_inference.py','dynamic_service.py')}
+    code=code_fingerprints()
     if meta is None:
         with sqlite3.connect('file:'+str(root/'data/adaptive/account.sqlite3')+'?mode=ro',uri=True) as old:
             old.execute('BEGIN');base=get(old,'meta')['account'];previous=load_state(old)
@@ -70,7 +123,7 @@ def initialize(root,db,at):
         s=seed(previous,at)
         meta=dict(created_at=at.isoformat(),mode='PAPER_ONLY',config=base['config'],adaptive_config=base['adaptive_config'],monitor_config=cfg,code=code,universe=base['universe'],anchor=previous['closed_day'],initial_equity=s['equity'],prior_account_sha=digest(previous),prior_account='adaptive',basis_note='迁移时按已核验账面估值建立本阶段成本基准，不冒充真实买入成本；历史收益保留在原账本，不相加')
         put(db,'migration','anchor',dict(meta=base,state=previous));put(db,'meta','account',meta);persist(db,s)
-    if meta['code']!=code or meta['monitor_config']!=cfg:raise ValueError('EXECUTION_VERSION_CHANGED_REVIEW_REQUIRED')
+    if reviewed_code(db,meta)!=code or meta['monitor_config']!=cfg:raise ValueError('EXECUTION_VERSION_CHANGED_REVIEW_REQUIRED')
     s=load_state(db);verify_projection(db,s)
     return meta,s
 
@@ -181,12 +234,12 @@ def close_day(root,day):
 def publish(root,meta,s,result):
     folder=root/'reports/dynamic/latest';folder.mkdir(parents=True,exist_ok=True)
     with db_open(root) as db:
-        nav=list(get(db,'nav').values())
+        nav=list(get(db,'nav').values());execution_code=reviewed_code(db,meta)
         last=db.execute("SELECT body FROM records WHERE kind='cycles' ORDER BY CAST(key AS INTEGER) DESC LIMIT 1").fetchone()
     if 'decision_rows' not in result and last:
         last=json.loads(last[0]);result={**result,'decision_rows':last['result'].get('decision_rows',[]),'last_decision_at':last['at']}
     
-    r=dict(checked_at=now().isoformat(),mode='PAPER_ONLY',submitted_real_orders=0,meta=meta,account=s,nav=nav,**result)
+    r=dict(checked_at=now().isoformat(),mode='PAPER_ONLY',submitted_real_orders=0,meta=meta,account=s,nav=nav,execution_code=execution_code,**result)
     r['unrealized_pnl_estimate']=sum(p['shares']*s['marks'][k]-p['basis'] for k,p in s['positions'].items())
     r['cumulative_return']=s['equity']/meta['initial_equity']-1;r['capital_utilization']=1-s['cash']/s['equity']
     r['limitations']=['仅模拟委托与估值，真实账户由用户手动交易，成交价/数量可能不同','盘中未完成日线输入尚未独立验证，原模型及正式准入标准不变','公开行情30秒轮询，无逐笔权限或低延迟服务承诺；资料缺失暂停','既有持仓成本按迁移估值建立阶段基准，不能当作券商历史成本','自动重报价通过超时撤单、冷却及新风险检查产生新委托，不追补断线期间成交']
@@ -194,11 +247,13 @@ def publish(root,meta,s,result):
     for name,rows in [('FILLS',s['executions']),('ORDERS',list(s['orders'].values())),('NAV',nav)]:
         pd.DataFrame(rows).to_csv(folder/(name+'.csv'),index=False,encoding='utf-8-sig')
     e=lambda x:html.escape(str(x));rows=''
+    from .reporting.plain_chinese import translate
+    last_events={item['order_id']:item for item in s['order_events']}
     for o in list(s['orders'].values())[-30:][::-1]:
-        rows+='<tr>'+''.join('<td>'+e(x)+'</td>' for x in [o['created_at'],o['name'],o['side'],o['quantity'],o['filled'],o['limit_price'],o['status'],'；'.join(o.get('rationale',[]))])+'</tr>'
-    if not rows:rows='<tr><td colspan="8">尚无模拟委托；等待当时有效的行情、预测、资讯与风险检查，不预先假定成交。</td></tr>'
+        rows+='<tr>'+''.join('<td>'+e(x)+'</td>' for x in [o['created_at'],o['name'],o['side'],o['quantity'],o['filled'],o['limit_price'],o['status'],translate(last_events.get(o['id'],{}).get('reason','尚无状态记录')),'；'.join(o.get('rationale',[]))])+'</tr>'
+    if not rows:rows='<tr><td colspan="9">尚无模拟委托；等待当时有效的行情、预测、资讯与风险检查，不预先假定成交。</td></tr>'
     positions=''.join('<tr>'+''.join('<td>'+e(x)+'</td>' for x in [meta['universe'].get(k,k),p['shares'],p['sellable'],round(p.get('basis',0),2),s['marks'].get(k),round(p['shares']*s['marks'][k]-p.get('basis',0),2)])+'</tr>' for k,p in s['positions'].items() if p['shares'])
-    page='<html lang="zh"><meta charset="utf-8"><meta http-equiv="refresh" content="30"><title>动态模拟交易与收益</title><style>body{font:15px/1.5 system-ui;margin:20px;color:#183047}table{border-collapse:collapse}th,td{padding:5px 9px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top;white-space:nowrap}.scroll{overflow:auto}h2{margin:16px 0 6px}</style><h1>动态模拟账户 · 不操作真实资金</h1><p>检查 '+e(r['checked_at'])+'；状态 '+e(r['status'])+'；估值 '+e(s['valuation_at'])+' / '+e(s['valuation_status'])+'</p><h2>买卖操作与委托状态</h2><p>ACCEPTED是待撮合，PARTIALLY_FILLED为部分模拟成交，FILLED为全部模拟成交；CANCELED/REJECTED没有新增成交。</p><div class="scroll"><table><tr><th>时间</th><th>股票</th><th>方向</th><th>委托股数</th><th>模拟成交股数</th><th>限价</th><th>状态</th><th>依据</th></tr>'+rows+'</table></div>'
+    page='<html lang="zh"><meta charset="utf-8"><meta http-equiv="refresh" content="30"><title>动态模拟交易与收益</title><style>body{font:15px/1.5 system-ui;margin:20px;color:#183047}table{border-collapse:collapse}th,td{padding:5px 9px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top;white-space:nowrap}.scroll{overflow:auto}h2{margin:16px 0 6px}</style><h1>动态模拟账户 · 不操作真实资金</h1><p>检查 '+e(r['checked_at'])+'；状态 '+e(r['status'])+'；估值 '+e(s['valuation_at'])+' / '+e(s['valuation_status'])+'</p><h2>买卖操作与委托状态</h2><p>ACCEPTED是待撮合，PARTIALLY_FILLED为部分模拟成交，FILLED为全部模拟成交；CANCELED/REJECTED没有新增成交。</p><div class="scroll"><table><tr><th>时间</th><th>股票</th><th>方向</th><th>委托股数</th><th>模拟成交股数</th><th>限价</th><th>状态</th><th>状态原因</th><th>依据</th></tr>'+rows+'</table></div>'
     page+='<h2>收益与持仓</h2><p>净值 '+f"{s['equity']:.2f}"+'；现金 '+f"{s['cash']:.2f}"+'；本阶段已实现 '+f"{s['realized_pnl']:.2f}"+'；未实现估值 '+f"{r['unrealized_pnl_estimate']:.2f}"+'；累计 '+f"{r['cumulative_return']:.2%}"+'；累计费用 '+f"{s['total_fees']:.2f}"+'；最大回撤 '+f"{s['max_drawdown']:.2%}"+'。</p><p>'+e(meta['basis_note'])+'</p><div class="scroll"><table><tr><th>股票</th><th>持有</th><th>可卖</th><th>阶段成本</th><th>参考估值价</th><th>阶段浮盈亏</th></tr>'+positions+'</table></div>'
     page+='<p>判断记录时间：'+e(result.get('last_decision_at',result.get('model',{}).get('at','尚无')))+'</p><h2>最近动态判断与原排名</h2><div class="scroll"><table><tr><th>股票</th><th>原始排名</th><th>当前股数</th><th>动态目标</th><th>预测净收益</th><th>报价时间</th><th>依据</th></tr>'
     for row in result.get('decision_rows',[]):
