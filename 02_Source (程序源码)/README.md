@@ -27,7 +27,7 @@ Public source and documentation only. Local runtime records remain on your compu
 
 | File (文件) | Purpose (用途) |
 |---|---|
-| [asharequant/intraday_inference.py](../asharequant/intraday_inference.py) | Prediction module: intraday_inference.py (复用已保存模型系数，对当时未完成日线进行研究推理；原预测评分不变，盘中效果未独立验证。) |
+| [asharequant/intraday_inference.py](../asharequant/intraday_inference.py) | Prediction module: intraday_inference.py (读取模型绑定的不可变历史快照，核验版本、哈希与可用时间；复用原系数和公式进行盘中研究推理。) |
 | [asharequant/forecast.py](../asharequant/forecast.py) | Prediction module: forecast.py (核心收益预测：构建技术特征与未来收益标签、拟合 Ridge、产生预测及基础研究配置。) |
 | [asharequant/seven_metrics.py](../asharequant/seven_metrics.py) | Prediction module: seven_metrics.py (汇总七项研究指标，结合九因素计算综合评分并导出结果；评分本身不授予交易资格。) |
 | [asharequant/probability_calibration.py](../asharequant/probability_calibration.py) | Prediction module: probability_calibration.py (按时间顺序校准上涨概率，使用独立日期块，检查概率估计是否具有验证依据。) |
@@ -54,9 +54,9 @@ Public source and documentation only. Local runtime records remain on your compu
 | [asharequant/research_paper.py](../asharequant/research_paper.py) | Execution and Ledger module: research_paper.py (研究模型预测与独立模拟账户：冻结研究计划、跟踪预测到期并生成报告，不替换正式模型。) |
 | [asharequant/research_execution.py](../asharequant/research_execution.py) | Execution and Ledger module: research_execution.py (研究模拟执行引擎，按既定风险优先顺序处理减仓，并考虑执行约束。) |
 | [asharequant/active_research.py](../asharequant/active_research.py) | Execution and Ledger module: active_research.py (保留的日线研究模拟方案及历史账本，连接研究计划、执行及发布报告。) |
-| [asharequant/order_engine.py](../asharequant/order_engine.py) | Execution and Ledger module: order_engine.py (动态模拟委托生命周期、后续报价撮合、T+1、资金预留、部分成交费用及阶段盈亏；无真实券商通道。) |
+| [asharequant/order_engine.py](../asharequant/order_engine.py) | Execution and Ledger module: order_engine.py (动态模拟委托、稳定整手换算、后续报价撮合、T+1、费用及盈亏；无真实券商通道。) |
 | [asharequant/active_execution.py](../asharequant/active_execution.py) | Execution and Ledger module: active_execution.py (日常研究模拟执行及小额买单净优势检查，考虑实际单笔费用是否划算。) |
-| [asharequant/intraday.py](../asharequant/intraday.py) | Execution and Ledger module: intraday.py (盘中对照盯盘与独立模拟账户：交易时段轮询、提醒、模拟处理和收盘结算。) |
+| [asharequant/intraday.py](../asharequant/intraday.py) | Execution and Ledger module: intraday.py (盘中对照执行；提供仅修正浮点误差的统一整手股数换算，保留交易与风险条件。) |
 | [asharequant/adaptive_intraday.py](../asharequant/adaptive_intraday.py) | Execution and Ledger module: adaptive_intraday.py (原动态模拟账户与迁移来源，冻结证据保留；当前主账户由 dynamic_service 管理。) |
 | [asharequant/execution_replay.py](../asharequant/execution_replay.py) | Execution and Ledger module: execution_replay.py (按历史交易日重放候选订单，检查费用、涨跌停与交易状态；不能确认成交时不虚构成交。) |
 
@@ -81,7 +81,7 @@ Public source and documentation only. Local runtime records remain on your compu
 
 | File (文件) | Purpose (用途) |
 |---|---|
-| [asharequant/reporting/plain_chinese.py](../asharequant/reporting/plain_chinese.py) | Reporting module: reporting/plain_chinese.py (报告中文阅读层：解释状态、生成附件阅读表格，将旧空收益入口改为同一归档的动态主账户结算，说明缺项；检查本地链接。) |
+| [asharequant/reporting/plain_chinese.py](../asharequant/reporting/plain_chinese.py) | Reporting module: plain_chinese.py (报告中文阅读层，解释委托撤销、数据快照及模型校验状态；不改变原始数值与记录。) |
 | [asharequant/reporting/report.py](../asharequant/reporting/report.py) | Reporting module: reporting/report.py (生成主要分析网页、图表和指标展示。) |
 | [asharequant/reporting/daily_bundle.py](../asharequant/reporting/daily_bundle.py) | Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。) |
 | [asharequant/reporting/holding_summary.py](../asharequant/reporting/holding_summary.py) | Reporting module: reporting/holding_summary.py (从已冻结的研究计划提取现有持仓操作摘要，展示建议股数和依据。) |
@@ -92,7 +92,7 @@ Public source and documentation only. Local runtime records remain on your compu
 
 | File (文件) | Purpose (用途) |
 |---|---|
-| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (每30秒行情驱动模拟服务、研究推理、订单账本、收盘结算、报告和手动账户差异核对；只模拟。) |
+| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) |
 | [asharequant/cli.py](../asharequant/cli.py) | Operations module: cli.py (统一命令入口：分派 run、daily、forecast、decision、paper-account 等任务。) |
 | [asharequant/mac_alerts.py](../asharequant/mac_alerts.py) | Operations module: mac_alerts.py (独立无声 Mac 弹窗：仅提醒服务异常及恢复，交易事件不弹窗；不调用模型、不修改账本。) |
 | [asharequant/scheduler.py](../asharequant/scheduler.py) | Operations module: scheduler.py (本地定时服务唤醒后的检查器：按北京时间和交易日判断是否应运行，记录尝试及结果；不能自行唤醒关机电脑。) |
