@@ -85,8 +85,9 @@ Public source and documentation only. Local runtime records remain on your compu
 |---|---|
 | [asharequant/reporting/plain_chinese.py](../asharequant/reporting/plain_chinese.py) | Reporting module: plain_chinese.py (报告中文阅读层，解释委托撤销、数据快照及模型校验状态；不改变原始数值与记录。) |
 | [asharequant/reporting/report.py](../asharequant/reporting/report.py) | Reporting module: reporting/report.py (生成主要分析网页、图表和指标展示。) |
-| [asharequant/reporting/daily_bundle.py](../asharequant/reporting/daily_bundle.py) | Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。) |
-| [asharequant/reporting/iteration_status.py](../asharequant/reporting/iteration_status.py) | Chinese trial/validation status, previous study, wait reasons and per-slot progress. (中文试用与验证、上次研究、等待原因及分组进度。) |
+| [asharequant/reporting/daily_bundle.py](../asharequant/reporting/daily_bundle.py) | Daily report delivery, verified account returns and dedicated model-activity link; preserves earlier exports in backups. (每日交付与已结算收益，首页仅链接模型专栏，旧报告保留备份。) |
+| [asharequant/reporting/iteration_status.py](../asharequant/reporting/iteration_status.py) | Current model-activity presentation entry and legacy study status. (当前模型活动专栏入口与旧研究状态兼容展示。) |
+| [asharequant/reporting/model_activity.py](../asharequant/reporting/model_activity.py) | Read-only sealed training evidence, actual trial adoption and independent acceptance panels. (只读封存训练证据，分栏显示实际试用和独立验收，不重训或改账本。) |
 | [asharequant/reporting/holding_summary.py](../asharequant/reporting/holding_summary.py) | Reporting module: reporting/holding_summary.py (从已冻结的研究计划提取现有持仓操作摘要，展示建议股数和依据。) |
 | [asharequant/reporting/probability_display.py](../asharequant/reporting/probability_display.py) | Reporting module: reporting/probability_display.py (展示研究上涨概率和未通过原因，避免把研究估计写成已验证概率。) |
 | [asharequant/reporting/report_navigation.py](../asharequant/reporting/report_navigation.py) | Reporting module: reporting/report_navigation.py (管理完整总览与动态模拟入口，每30秒同步桌面实时展示及附件，隐藏旧策略；不修改模型或账本。) |
