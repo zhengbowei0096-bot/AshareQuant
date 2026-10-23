@@ -649,7 +649,13 @@
         {
           "target": "asharequant/iteration.py",
           "label": "06_iteration.py",
-          "purpose": "Validation module: iteration.py (根据漂移或预设触发条件组织候选研究，不使用前瞻验收样本迎合调参。)",
+          "purpose": "Fingerprint-bound candidate search and legacy cadence retained for audit; current CLI scheduling is in daily_iteration.py. (保留原候选算法与旧调度供指纹审计，当前日常调度见 daily_iteration.py。)",
+          "subfolder": "05_Validation (验证与迭代)"
+        },
+        {
+          "target": "asharequant/daily_iteration.py",
+          "label": "daily_iteration.py",
+          "purpose": "Daily scheduling of matured forecast/actual comparisons, one checkpoint per session, frozen-candidate progress and unchanged promotion gates. (每天比较到期预测与实际结果，同日去重；候选冻结验收，门槛不变。)",
           "subfolder": "05_Validation (验证与迭代)"
         },
         {
@@ -704,6 +710,12 @@
           "target": "asharequant/reporting/daily_bundle.py",
           "label": "03_reporting__daily_bundle.py",
           "purpose": "Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。)",
+          "subfolder": "06_Reporting (报告展示)"
+        },
+        {
+          "target": "asharequant/reporting/iteration_status.py",
+          "label": "iteration_status.py",
+          "purpose": "Readable research status, waiting reason, prior study and next eligible time; explicit empty states. (显示研究等待原因、上次结果和下次时间，无空表格。)",
           "subfolder": "06_Reporting (报告展示)"
         },
         {
@@ -1574,6 +1586,12 @@
       "purpose": "Tests live in tests/, maintenance commands in scripts/, data comparison and historical acceptance in tools/. Some tools read or write local records. (测试、维护、对比及历史验收分别归类，执行前核对说明。)",
       "entries": [
         {
+          "target": "tests/test_daily_iteration.py",
+          "label": "Daily_Research_Tests.py",
+          "purpose": "Daily research deduplication, actual-outcome timing, frozen validation, recovery and readable report regressions. (每日研究、时序、冻结验证、恢复与报告回归测试。)",
+          "subfolder": ""
+        },
+        {
           "target": "tools/compare_sources.py",
           "label": "compare_sources.py",
           "purpose": "Compare preserved historical source snapshots; needs local watchlist and data. Run from the project root with python -m tools.compare_sources. (历史来源对比，不是实时第二行情源。)",
@@ -1874,6 +1892,7 @@
       "asharequant/core.py",
       "asharequant/daily.py",
       "asharequant/daily_bundle.py",
+      "asharequant/daily_iteration.py",
       "asharequant/data.py",
       "asharequant/data_sources/__init__.py",
       "asharequant/data_sources/broker_records.py",
@@ -1917,6 +1936,7 @@
       "asharequant/reporting/__init__.py",
       "asharequant/reporting/daily_bundle.py",
       "asharequant/reporting/holding_summary.py",
+      "asharequant/reporting/iteration_status.py",
       "asharequant/reporting/plain_chinese.py",
       "asharequant/reporting/probability_display.py",
       "asharequant/reporting/report.py",
@@ -1975,6 +1995,7 @@
       "tests/test_corporate_ledger.py",
       "tests/test_daily_acceptance.py",
       "tests/test_daily_bundle.py",
+      "tests/test_daily_iteration.py",
       "tests/test_database.py",
       "tests/test_decision.py",
       "tests/test_dynamic_execution.py",
