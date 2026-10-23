@@ -655,7 +655,7 @@
         {
           "target": "asharequant/daily_iteration.py",
           "label": "daily_iteration.py",
-          "purpose": "Daily scheduling of matured forecast/actual comparisons, one checkpoint per session, frozen-candidate progress and unchanged promotion gates. (每天比较到期预测与实际结果，同日去重；候选冻结验收，门槛不变。)",
+          "purpose": "Daily entry for per-slot trials; retains the legacy frozen scheduler. (分组试用的每日入口，保留旧版冻结调度兼容实现。)",
           "subfolder": "05_Validation (验证与迭代)"
         },
         {
@@ -715,7 +715,7 @@
         {
           "target": "asharequant/reporting/iteration_status.py",
           "label": "iteration_status.py",
-          "purpose": "Readable research status, waiting reason, prior study and next eligible time; explicit empty states. (显示研究等待原因、上次结果和下次时间，无空表格。)",
+          "purpose": "Chinese trial/validation status, previous study, wait reasons and per-slot progress. (中文试用与验证、上次研究、等待原因及分组进度。)",
           "subfolder": "06_Reporting (报告展示)"
         },
         {
@@ -909,6 +909,12 @@
           "label": "21_risk____init__.py",
           "purpose": "Compatibility module: risk/__init__.py (Python 包标识，标明该目录属于程序包；不负责独立预测或下单。)",
           "subfolder": "08_Compatibility (兼容入口)"
+        },
+        {
+          "target": "asharequant/slot_upgrade.py",
+          "label": "slot_upgrade.py",
+          "purpose": "Per-stock/horizon research trial and immutable prospective acceptance; no trading admission. (分股票与期限研究试用、封存验证，不授予交易资格。)",
+          "subfolder": "05_Validation (验证与迭代)"
         }
       ],
       "public_links": []
@@ -1644,6 +1650,12 @@
           "label": "Editor_Settings (编辑器设置)",
           "purpose": "Local interpreter selection; retain without publishing. (本机解释器选择，不公开。)",
           "subfolder": ""
+        },
+        {
+          "target": "tests/test_slot_upgrade.py",
+          "label": "test_slot_upgrade.py",
+          "purpose": "Test independent slot trials, chronology, rejection, integrity and corrected acceptance. (验证分组试用、时间顺序、退出与完整性。)",
+          "subfolder": ""
         }
       ],
       "public_links": []
@@ -1723,6 +1735,12 @@
           "label": "Legacy_File_Map.txt",
           "purpose": "Historical implementation or research note; dated claims are not current test results. (历史开发或研究说明，过去验收不代表本次通过。)",
           "subfolder": "Historical_Notes (历史说明)"
+        },
+        {
+          "target": "docs/MODEL_UPGRADES.md",
+          "label": "MODEL_UPGRADES.md",
+          "purpose": "Daily research trial, per-slot validation and evidence policy. (每日试用、分组验证与证据说明。)",
+          "subfolder": ""
         }
       ],
       "public_links": []
@@ -2036,7 +2054,10 @@
       "tools/verify_factors.py",
       "tools/verify_models.py",
       "tools/verify_risk_models.py",
-      "tools/verify_stage1.py"
+      "tools/verify_stage1.py",
+      "asharequant/slot_upgrade.py",
+      "tests/test_slot_upgrade.py",
+      "docs/MODEL_UPGRADES.md"
     ]
   },
   "root_visible_files": [
