@@ -6,13 +6,19 @@ Desktop workspace: numbered English categories; runtime paths are retained for s
 
 Start with the guide, daily overview and live account. (先看指南、每日总览和实时账户。)
 
+[Open category (打开分类)](../00_Start_Here%20%28%E4%BD%BF%E7%94%A8%E5%85%A5%E5%8F%A3%29/README.md)
+
 ## 01_Reports (报告与收益)
 
 Read the main account, predictions and validation. Archived snapshots keep their original dates. (查看主账户、预测、验证及按日期保存的历史报告。)
 
+[Open category (打开分类)](../01_Reports%20%28%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%94%B6%E7%9B%8A%29/README.md)
+
 ## 02_Source (程序源码)
 
 Read modules in execution order; links keep runtime paths and source fingerprints intact. (按数据到运行顺序查看源码，原路径与指纹保留。)
+
+[Open category (打开分类)](../02_Source%20%28%E7%A8%8B%E5%BA%8F%E6%BA%90%E7%A0%81%29/README.md)
 
 ### 01_Data (数据获取)
 
@@ -139,29 +145,43 @@ Read modules in execution order; links keep runtime paths and source fingerprint
 
 Local settings and public examples; do not change risk limits by moving files. (本机配置与公开模板，整理不改变参数。)
 
+[Open category (打开分类)](../03_Configuration%20%28%E9%85%8D%E7%BD%AE%29/README.md)
+
 ## 04_Data (数据与账本)
 
 Private runtime data. Keep ledgers and frozen research records intact. (私人运行数据，保留账本和冻结研究证据。)
+
+[Open category (打开分类)](../04_Data%20%28%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%B4%A6%E6%9C%AC%29/README.md)
 
 ## 05_Operations (运行与诊断)
 
 Service configuration, health checks and logs. Services keep their existing paths and schedules. (服务配置、健康状态和日志，运行路径与时间不变。)
 
+[Open category (打开分类)](../05_Operations%20%28%E8%BF%90%E8%A1%8C%E4%B8%8E%E8%AF%8A%E6%96%AD%29/README.md)
+
 ## 06_Tests_and_Tools (测试与工具)
 
 Automated tests and explicit maintenance tools; verification scripts can have side effects. (自动测试与维护工具，验收脚本可能联网或写记录。)
+
+[Open category (打开分类)](../06_Tests_and_Tools%20%28%E6%B5%8B%E8%AF%95%E4%B8%8E%E5%B7%A5%E5%85%B7%29/README.md)
 
 ## 07_Documentation (说明文档)
 
 Current manuals separated from historical implementation notes. (当前使用说明与历史开发记录分开。)
 
+[Open category (打开分类)](../07_Documentation%20%28%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3%29/README.md)
+
 ## 08_Archives_and_Backups (历史与回滚)
 
 Evidence and recoverable changes. Do not confuse backups with active code. (证据与可恢复变更，不作为当前运行代码。)
 
+[Open category (打开分类)](../08_Archives_and_Backups%20%28%E5%8E%86%E5%8F%B2%E4%B8%8E%E5%9B%9E%E6%BB%9A%29/README.md)
+
 ## 09_Environment (环境与依赖)
 
 Dependency definitions, vendor library and required certificate chain. (依赖定义、第三方库及必要证书链。)
+
+[Open category (打开分类)](../09_Environment%20%28%E7%8E%AF%E5%A2%83%E4%B8%8E%E4%BE%9D%E8%B5%96%29/README.md)
 
 ## Maintenance (维护)
 
