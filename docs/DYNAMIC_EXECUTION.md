@@ -112,3 +112,18 @@ python -m asharequant.dynamic_service reconcile --root . --snapshot path/to/manu
 ## Per-slot research trials (分组研究试用)
 
 The daily source may carry a different reviewed ridge recipe for each stock and prediction horizon. Intraday inference reads `model_features` from each daily forecast, falling back to the original common feature set for old records. It continues to reuse daily fitted parameters and does not retrain on each quote. A trial or daily prediction release does not validate unfinished daily bars or grant trading/probability admission. See [MODEL_UPGRADES.md](MODEL_UPGRADES.md).
+
+## Dynamic decision diagnostics (动态判断异常与恢复)
+
+“最近动态判断与原排名”现在直接解释为什么没有明细，包括最近盘中尝试时间、具体异常、判断覆盖数、最近成功时间及恢复确认时间。行情检查问题按股票列出。缺少完整判断时显示说明，不留下空表，也不把最近尝试时间冒充成功判断时间。
+
+- **尚无记录**：尚未保存有效盘中尝试，等待交易时段运行。
+- **判断受阻**：例如模型绑定历史不匹配、行情来源冲突、买卖盘无效或公司行动待核对。保留最后一次异常及时间；休市、服务重启和代码部署都不能自动清除它。独立风控减仓与估值仍受各自条件限制，不代表模型推理正常。
+- **已恢复**：后续实际保存的一轮记录具备完整观察池的唯一股票判断、完整模型审计及合规时间顺序，且选中证据的校验值有效。显示最近一次异常之后首次成功的时间。后续再次失败立即回到受阻状态，不拿旧成功结果填表。
+- **证据无法核验**：记录缺失字段、无法读取、时间不合规或校验失败时，不宣称已恢复。
+
+休市显示的成功判断是历史记录，必须核对日期。判断成功不要求产生交易，也不等于独立模型验收通过。`report.json` 的 `decision_diagnostic` 是从既有证据派生的展示字段；原始周期、成交与净值记录不追改。当前健康日志仍表示服务本轮状态，不将历史异常冒充当前交易时段的新告警。桌面实时入口继续每30秒同步，未来每日导出沿用相同模板；没有开启交易提醒或恢复频繁聊天轮询。
+
+下一开盘核验应在当地交易日历确认的交易日、北京时间09:30以后，检查连续至少3轮真实运行证据：请求耗时、报价年龄、观察池完整覆盖及质量问题、模型实际重算与1/5/20日结果、完整判断和恢复时间、模型/行情/订单/撮合的真实先后顺序，以及现金加持仓估值等于权益和盈亏恒等式。没有成交时撮合检查标不适用，不为验收强制交易。软件测试、历史只读诊断和开盘实际运行分别报告；有缺项就列明缺项。一次性核验需要电脑在线且应用运行，不会补造离线期间交易。
+
+维护该展示涉及已绑定指纹的 `dynamic_service.py`，仍须遵循上文收盘备份和 `approve_upgrade` 追加审核流程；不得修改初始指纹或降低风控。回滚同样需要审核原版本并保留审计链，不能删除新增审核记录。

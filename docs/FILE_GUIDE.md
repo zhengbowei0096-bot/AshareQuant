@@ -109,6 +109,7 @@ Read modules in execution order; links keep runtime paths and source fingerprint
 | [asharequant/reporting/report.py](../asharequant/reporting/report.py) | Reporting module: reporting/report.py (生成主要分析网页、图表和指标展示。) |
 | [asharequant/reporting/daily_bundle.py](../asharequant/reporting/daily_bundle.py) | Daily report delivery, verified account returns and dedicated model-activity link; preserves earlier exports in backups. (每日交付与已结算收益，首页仅链接模型专栏，旧报告保留备份。) |
 | [asharequant/reporting/iteration_status.py](../asharequant/reporting/iteration_status.py) | Current model-activity presentation entry and legacy study status. (当前模型活动专栏入口与旧研究状态兼容展示。) |
+| [asharequant/reporting/dynamic_status.py](../asharequant/reporting/dynamic_status.py) | Reporting module: dynamic_status.py (只读核验盘中判断证据，显示具体异常、最近成功与恢复时间；缺失、覆盖不全或校验失败时解释原因，不展示空表。) |
 | [asharequant/reporting/model_activity.py](../asharequant/reporting/model_activity.py) | Read-only sealed training evidence, actual trial adoption and independent acceptance panels. (只读封存训练证据，分栏显示实际试用和独立验收，不重训或改账本。) |
 | [asharequant/reporting/holding_summary.py](../asharequant/reporting/holding_summary.py) | Reporting module: reporting/holding_summary.py (从已冻结的研究计划提取现有持仓操作摘要，展示建议股数和依据。) |
 | [asharequant/reporting/probability_display.py](../asharequant/reporting/probability_display.py) | Reporting module: reporting/probability_display.py (展示研究上涨概率和未通过原因，避免把研究估计写成已验证概率。) |
@@ -118,7 +119,7 @@ Read modules in execution order; links keep runtime paths and source fingerprint
 
 | File (文件) | Purpose (用途) |
 |---|---|
-| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) |
+| [asharequant/dynamic_service.py](../asharequant/dynamic_service.py) | Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) 报告保留最近盘中异常与经核验的恢复状态，休市不表示已恢复。 |
 | [asharequant/cli.py](../asharequant/cli.py) | Operations module: cli.py (统一命令入口：分派 run、daily、forecast、decision、paper-account 等任务。) |
 | [asharequant/mac_alerts.py](../asharequant/mac_alerts.py) | Operations module: mac_alerts.py (独立无声 Mac 弹窗：仅提醒服务异常及恢复，交易事件不弹窗；不调用模型、不修改账本。) |
 | [asharequant/scheduler.py](../asharequant/scheduler.py) | Operations module: scheduler.py (本地定时服务唤醒后的检查器：按北京时间和交易日判断是否应运行，记录尝试及结果；不能自行唤醒关机电脑。) |
