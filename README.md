@@ -257,3 +257,11 @@ python -m asharequant.dynamic_service close --root . --date YYYY-MM-DD
 盘中推理读取保存模型所绑定的历史版本，最新数据刷新不会替换这份输入；仍校验文件完整性、来源和可用时间。委托生成与后续撮合共用整手股数换算，仅消除浮点运算造成的边界误差。预测公式、系数和风险参数保持原样。报告增加中文“状态原因”，区分目标变化、行情不可靠和超时撤单。
 
 执行代码更新须在收盘结算后完成测试、备份并追加版本审核记录；常规轮询不能自行认可新代码。详见 [动态执行说明](docs/DYNAMIC_EXECUTION.md) 与 [验证记录](docs/VALIDATION.md)。这些修复不代表当前数据问题全部解决，也不代表盘中模型已获得正式资格。
+
+## Daily model research (每日模型研究)
+
+The scheduled daily workflow now evaluates archived forecasts against confirmed actual outcomes after 18:00 Asia/Shanghai. With complete verified inputs and new primary daily outcomes, it runs the original nine-candidate search once per completed trading session. Repeated attempts reuse the completed study; no 30-day or 90-day scheduling cooldown applies to this daily entry. Run `python -m asharequant.cli iteration --root .` for a manual check under the same lock and rules.
+
+The original feature formulas, ridge candidate family, risk parameters and validation thresholds are unchanged. A candidate must still improve historical mean absolute error by at least 2%, with at least three of four validation blocks improved in every stock/horizon slot, before entering future independent validation. While that frozen experiment is pending, the system evaluates it daily and does not retune it. Only the existing lifecycle acceptance and promotion checks may replace a formal model. Daily research does **not** guarantee daily upgrades or switch the active research simulation to an unvalidated candidate.
+
+The daily overview and “模型研究进度” show the waiting reason, last completed study with its own date, failure thresholds, next scheduled check and conditional next research time. Missing data or outcomes produce an explanation instead of an empty table. The next time comes from the verified exchange calendar; uncertain eligibility is shown as unknown. Existing forecasts, fills and historical evidence are retained. (每日评估、符合条件才研究，独立验收全部通过才升级；未到期结果不算误差，同日重跑不增加样本。)
