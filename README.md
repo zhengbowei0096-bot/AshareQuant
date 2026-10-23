@@ -6,6 +6,27 @@
 
 它不是“保证赚钱”的选股工具。与普通行情软件相比，本项目重点是记录每次预测、验证预测是否有效、比较策略并持续模拟记账。使用者可以查看判断依据和不交易原因，开发者可以复现计算和测试。
 
+## Workspace navigation (分类入口)
+
+GitHub 与桌面使用同一套 **00–09 分类顺序**。点击下表或仓库顶部同名文件夹，即可阅读用途并打开对应程序。公开页面只链接审核过的源码、模板和说明；账户、密钥、账本、报告及备份留在本机。
+
+| Category (分类) | Open here for (用途) |
+|---|---|
+| [00_Start_Here (使用入口)](00_Start_Here%20%28%E4%BD%BF%E7%94%A8%E5%85%A5%E5%8F%A3%29/README.md) | 项目用途、安装方法与文件说明 |
+| [01_Reports (报告与收益)](01_Reports%20%28%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%94%B6%E7%9B%8A%29/README.md) | 报告生成、收益展示与中文阅读功能 |
+| [02_Source (程序源码)](02_Source%20%28%E7%A8%8B%E5%BA%8F%E6%BA%90%E7%A0%81%29/README.md) | 按数据、预测、决策、风险、模拟执行顺序查看全部程序 |
+| [03_Configuration (配置)](03_Configuration%20%28%E9%85%8D%E7%BD%AE%29/README.md) | 公开配置模板与初始化说明 |
+| [04_Data (数据与账本)](04_Data%20%28%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%B4%A6%E6%9C%AC%29/README.md) | 数据获取、数据库与账户账本实现；私人数据不上传 |
+| [05_Operations (运行与诊断)](05_Operations%20%28%E8%BF%90%E8%A1%8C%E4%B8%8E%E8%AF%8A%E6%96%AD%29/README.md) | 每日运行、盘中服务、健康检查及本地提醒 |
+| [06_Tests_and_Tools (测试与工具)](06_Tests_and_Tools%20%28%E6%B5%8B%E8%AF%95%E4%B8%8E%E5%B7%A5%E5%85%B7%29/README.md) | 自动化测试、初始化与维护工具 |
+| [07_Documentation (说明文档)](07_Documentation%20%28%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3%29/README.md) | 架构、文件指南、运行、安全及验证说明 |
+| [08_Archives_and_Backups (历史与回滚)](08_Archives_and_Backups%20%28%E5%8E%86%E5%8F%B2%E4%B8%8E%E5%9B%9E%E6%BB%9A%29/README.md) | 归档与恢复功能；本机历史备份不上传 |
+| [09_Environment (环境与依赖)](09_Environment%20%28%E7%8E%AF%E5%A2%83%E4%B8%8E%E4%BE%9D%E8%B5%96%29/README.md) | 依赖版本、环境要求与 Git 排除规则 |
+
+GitHub 展示的是完整功能源码；新下载的项目不会包含你的已配置账户、已安装服务或历史运行结果。程序实际路径保持兼容，因此仓库仍保留 `asharequant/`、`config/` 等底层目录。十个分类页均为导航入口，不复制另一套程序。
+
+桌面分类、GitHub 分类页和文件说明由同一份 [`config/workspace_layout.json`](config/workspace_layout.json) 维护。运行 `python scripts/organize_workspace.py --root . --apply` 可生成本地分类；只有每类的 `README.md` 可以提交，其他本地链接与清单保持忽略。详见 [Workspace guide (工作区指南)](docs/WORKSPACE_LAYOUT.md)。
+
 ## 能做什么
 
 | 能力 | 代码状态与边界 |
@@ -41,29 +62,6 @@ flowchart LR
 ```
 
 原始预测与决策层分开：改变仓位预算不应改变模型预测值。当前默认使用一套动态模拟主账户；旧账本仅保留内部依赖与历史证据，不叠加收益。正式模型资格不因模拟收益好就自动获得。
-
-## Workspace layout (文件分类)
-
-The local desktop workspace groups files by purpose, with English names and Chinese notes. Start in `00_Start_Here (使用入口)`. Use the [workspace guide](docs/WORKSPACE_LAYOUT.md) and [file-by-file guide](docs/FILE_GUIDE.md). Runtime paths, algorithms, account records and service schedules are retained. Preview the organization with `python scripts/organize_workspace.py --root .`; apply it with `--apply`. Generated local navigation is excluded from Git.
-
-## Repository and local workspace (仓库与本机分类)
-
-GitHub 保存源代码、测试、公开配置模板和说明；桌面的十个编号分类由同一份 [`config/workspace_layout.json`](config/workspace_layout.json) 生成。分类顺序和用途说明保持一致，GitHub 的默认文件列表仍按平台规则排序。
-
-| Category (分类) | Repository content (仓库内容) |
-|---|---|
-| 00 Start Here (使用入口) | 本 README 与 [文件逐项说明](docs/FILE_GUIDE.md) |
-| 01 Reports (报告与收益) | 仅保留报告生成代码；本地报告不上传 |
-| 02 Source (程序源码) | [`asharequant/`](asharequant/) |
-| 03 Configuration (配置) | [`config/`](config/) 中的公开模板和分类定义；私人配置不上传 |
-| 04 Data (数据与账本) | 数据库、账户、持仓及交易记录仅在本机 |
-| 05 Operations (运行与诊断) | 源码中的调度/诊断入口；本机服务配置和日志不上传 |
-| 06 Tests and Tools (测试与工具) | [`tests/`](tests/)、[`scripts/`](scripts/)、[`tools/`](tools/) |
-| 07 Documentation (说明文档) | [`docs/`](docs/) 与 [`AGENTS.md`](AGENTS.md) |
-| 08 Archives and Backups (历史与回滚) | 备份、历史报告和原始证据仅在本机 |
-| 09 Environment (环境与依赖) | [`requirements.txt`](requirements.txt) 等依赖定义；虚拟环境不上传 |
-
-新克隆默认不含账户数据或报告。分类脚本只为实际存在的目标生成本地链接；本地 HTML 文件指南应在浏览器打开，GitHub 上直接阅读 Markdown 指南。更多发布边界见 [SECURITY.md](docs/SECURITY.md)。
 
 ## 项目目录
 

@@ -19,6 +19,11 @@
 /automation/
 /vendor/
 /certs/
+/credentials/
+/outputs/
+/work/
+/screenshots/
+*.log
 __pycache__/
 *.py[cod]
 .DS_Store
@@ -34,3 +39,30 @@ venv/
 *.egg-info/
 build/
 dist/
+
+# Generated local workspace links and private inventory
+/0[0-9]_*/
+/.workspace-layout.json
+
+# Public category landing pages only; local links and inventories stay ignored
+/0[0-9]_*/*
+!/00_Start_Here (使用入口)/
+!/00_Start_Here (使用入口)/README.md
+!/01_Reports (报告与收益)/
+!/01_Reports (报告与收益)/README.md
+!/02_Source (程序源码)/
+!/02_Source (程序源码)/README.md
+!/03_Configuration (配置)/
+!/03_Configuration (配置)/README.md
+!/04_Data (数据与账本)/
+!/04_Data (数据与账本)/README.md
+!/05_Operations (运行与诊断)/
+!/05_Operations (运行与诊断)/README.md
+!/06_Tests_and_Tools (测试与工具)/
+!/06_Tests_and_Tools (测试与工具)/README.md
+!/07_Documentation (说明文档)/
+!/07_Documentation (说明文档)/README.md
+!/08_Archives_and_Backups (历史与回滚)/
+!/08_Archives_and_Backups (历史与回滚)/README.md
+!/09_Environment (环境与依赖)/
+!/09_Environment (环境与依赖)/README.md

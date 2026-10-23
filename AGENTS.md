@@ -35,3 +35,5 @@
 ## Workspace organization (英文分类工作区)
 
 Future file changes must update `config/workspace_layout.json`, `docs/FILE_GUIDE.md`/`.html` and the compatibility file guide, then refresh with `scripts/organize_workspace.py`. Keep the ten numbered category names English-first with Chinese notes. The older `00_程序文件导航/` entry remains a compatibility route to the current source categories. Do not move fingerprint-bound source/configuration files or ledger files solely to tidy Finder; keep the runtime paths and classify them with relative links. New unclassified files must be reviewed before hiding them. (新增文件须同步分类、用途与导航；不得为整理而破坏指纹或账本路径。)
+
+Public GitHub navigation uses the same ten category folders, with only each category README committed. When adding public files, update `public_navigation.files` and category coverage in `config/workspace_layout.json`, then regenerate the category pages and file guides together. Do not publish generated local launchers, symlinks, inventories, accounts or reports. (公开分类页与桌面同序；新源码须加入审核清单并归类，私有运行产物不发布。)
