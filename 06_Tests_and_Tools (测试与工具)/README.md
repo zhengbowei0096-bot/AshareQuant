@@ -47,6 +47,7 @@ Public source and documentation only. Local runtime records remain on your compu
 | [tests/test_risk_control.py](../tests/test_risk_control.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_risk_models.py](../tests/test_risk_models.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_seven_metrics.py](../tests/test_seven_metrics.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
+| [tests/test_slot_upgrade.py](../tests/test_slot_upgrade.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_strategy_experiment.py](../tests/test_strategy_experiment.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_strict_validation.py](../tests/test_strict_validation.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_system.py](../tests/test_system.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
