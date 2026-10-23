@@ -14,6 +14,7 @@ Public source and documentation only. Local runtime records remain on your compu
 | [docs/DYNAMIC_EXECUTION.md](../docs/DYNAMIC_EXECUTION.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
 | [docs/FILE_GUIDE.html](../docs/FILE_GUIDE.html) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
 | [docs/FILE_GUIDE.md](../docs/FILE_GUIDE.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
+| [docs/MODEL_UPGRADES.md](../docs/MODEL_UPGRADES.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
 | [docs/SECURITY.md](../docs/SECURITY.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
 | [docs/VALIDATION.md](../docs/VALIDATION.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
 | [docs/WORKSPACE_LAYOUT.md](../docs/WORKSPACE_LAYOUT.md) | Architecture, validation, security and file guide. (架构、验证、安全及文件说明。) |
