@@ -5,3 +5,5 @@ requests>=2.31,<3
 scipy>=1.11,<2
 scikit-learn>=1.4,<2
 baostock==0.9.4
+
+beautifulsoup4>=4.12,<5

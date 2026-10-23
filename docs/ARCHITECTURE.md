@@ -26,7 +26,35 @@
 - 模型研究：`model_candidates.py`、`risk_models.py`、`lifecycle.py`
 - 组合与执行：`decision.py`、`execution_replay.py`、`strategies/`、`risk/`
 - 回测：`backtesting/research.py`，严格验证：`strict_validation.py`、`validation_engine.py`
-- 模拟：`paper_account.py`（对照）、`research_paper.py`、`active_research.py`、`intraday.py`、`adaptive_intraday.py`
+- 当前主模拟：`dynamic_service.py`、`intraday_inference.py`、`order_engine.py`；旧账本与内部依赖：`paper_account.py`、`research_paper.py`、`active_research.py`、`intraday.py`、`adaptive_intraday.py`
 - 调度：`scheduler.py`、`daily.py`；报告：`reporting/`
 
 代码归档及代码变更检查已覆盖嵌套目录。根目录兼容入口暂时保留，避免外部脚本和旧测试失效。
+
+## 行情事件执行层
+
+`dynamic_service → intraday_data / intraday_inference → research_policy + adaptive_policy → order_engine → SQLite账本 → reporting.daily_bundle`。
+新增研究推理重用保存的系数和原特征公式；没有训练、正式晋升或真实券商下单。独立锁和SQLite事务防止并发重复成交，委托先于后续报价撮合；成交和订单事件另存不可覆盖记录，当前账本投影有哈希核对。每日调度独立结算这一主账户，原冻结记录不重写。详细接口、参数和限制见 `DYNAMIC_EXECUTION.md`。
+
+
+## 无声 Mac 弹窗提醒
+独立 `asharequant/mac_alerts.py` 每30秒读取动态模拟提醒与健康状态，不调用语言模型，不修改账本。仅服务异常及恢复触发无声对话框；模拟买入、卖出、成交、撤单/拒单不弹窗，仍保留报告与账本记录。委托与成交分别显示；同订单更新合并，超过5分钟注明历史。重复事件按ID抑制，连续两次研究推理异常才提醒；交易时段健康超过120秒未更新提醒一次，恢复再提醒一次。
+对话框120秒后自动关闭；电脑须开机、用户登录且桌面可用，离线或休眠不能保证及时提醒。投递状态独立保存在 `logs/mac_alerts/`，失败重试；崩溃后可能重复提醒，不重复交易。系统接受弹窗不等于用户已经阅读。
+启动：`python -m asharequant.mac_alerts --root .`。服务为 `com.asharequant.mac-alerts`，独立于行情、模型和18点每日分析；停用此服务仅停止本地弹窗。聊天轮询仅在弹窗人工确认后暂停，18点任务保留。
+验证（2026-10-21）：7项通知逻辑测试通过，涵盖去重、部分成交数量、历史卖出、异常/恢复、持续异常、过期健康和无声调用；用户确认无声对话框可见。尚未用真实盘中买卖事件验收。回滚：停止本地提醒服务并恢复聊天轮询，交易算法及账本无须恢复。
+
+2026-10-21 用户更新：关闭所有交易事件弹窗，仅保留异常及恢复提醒；聊天轮询保持暂停，18点分析不变。交易事件仍标记已处理，避免旧消息补发。
+
+
+报告中文阅读层：reporting/plain_chinese.py 在每日导出与盘中展示时解释已知英文状态，将JSON/CSV链接转换为同目录中文HTML阅读视图，将代码块转为字段表格；保留原始记录。未识别字段保留名称供核查，不编造含义。每日导出检查本地目标和页内锚点；外部网站可用性不由本地校验保证。浏览器显示还需实际打开确认。
+
+
+## 单一主账户收益展示
+
+收益口径：系统只使用动态模拟主账户，持仓、委托、成交、费用和收益来自同一套账本。每日总览直接读取 `data/dynamic/account.sqlite3` 中经过完整性校验的已冻结收盘净值，不再读取券商净值导入表，不要求维护第二个账户。尚未结算的日期明确提示，不能以旧日收益替代。累计收益从本阶段迁移起点计算。模拟记账不代表券商确认的实际成交；用户自行操作资金账户，不自动保证一致。
+历史附件的展示更正只使用同一归档内的动态净值记录，不引入后续收益；原始 CSV、JSON 和数据库保留。旧账户导入功能可供兼容核查，不参与主账户收益计算。
+
+
+## Workspace presentation layer (工作区展示层)
+
+`config/workspace_layout.json` defines the numbered categories; `scripts/organize_workspace.py` builds relative file links and synchronized English-first guides. The script changes Finder visibility and regenerable caches only; model source files, local settings, service paths and ledgers stay in place. Maintenance and rollback: [WORKSPACE_LAYOUT.md](WORKSPACE_LAYOUT.md).

@@ -1,4 +1,6 @@
 import importlib
+import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,3 +26,18 @@ class LayoutTests(unittest.TestCase):
         paths={str(p.relative_to(root)) for pattern in PATTERNS for p in root.glob(pattern)}
         self.assertIn('asharequant/reporting/report.py',paths)
         self.assertIn('asharequant/data_sources/database.py',paths)
+
+    def test_public_templates_initialize_into_classified_runtime_paths(self):
+        from scripts.organize_workspace import load_plan
+        source=Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            shutil.copytree(source/'config',root/'config')
+            (root/'asharequant').mkdir()
+            (root/'.venv').mkdir()
+            created=initialize(root)
+            self.assertIn('dynamic_config.json',created)
+            self.assertNotIn('dynamic.json',created)
+            self.assertFalse(json.loads((root/'dynamic_config.json').read_text())['enabled'])
+            self.assertEqual(len(load_plan(root)['groups']),10)
+            self.assertEqual(initialize(root),[])

@@ -67,6 +67,15 @@ def _run(root, at=None, execute=None, verify=False):
                 except Exception as exc:
                     steps.append(dict(command='paper-account',exit_code=1,independent_settlement=True,error=str(exc)))
                     error=(error+'; ' if error else '')+'PAPER_SETTLEMENT_FAILED:'+str(exc)
+            if execute is None:
+                from .dynamic_service import enabled as dynamic_enabled, close_day as dynamic_close
+                if dynamic_enabled(root):
+                    try:
+                        result_dynamic=dynamic_close(root,key)
+                        steps.append(dict(command='dynamic-close',exit_code=0,status=result_dynamic['status']))
+                    except Exception as exc:
+                        status='FAILED';error=(error+'; ' if error else '')+'DYNAMIC_SETTLEMENT_FAILED:'+str(exc)
+                        steps.append(dict(command='dynamic-close',exit_code=1,error=str(exc)))
             after={name:hashlib.sha256((root/name).read_bytes()).hexdigest() if (root/name).exists() else None for name in stable_inputs}
             if before!=after:
                 status='FAILED';error='CONFIG_OR_ACCOUNT_CHANGED_DURING_RUN'

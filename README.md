@@ -1,5 +1,7 @@
 # 观澜量化｜A股研究与交易决策系统
 
+公开项目名为 **GuanlanQuant（观澜量化）**，Python 包和本地运行目录沿用 **AshareQuant / `asharequant`**，保持现有导入、服务和账本路径兼容。
+
 面向 A 股的本地量化研究、预测、风险管理与模拟交易系统。持续观察 20–50 只股票，以主板为主，把行情、模型判断、交易成本和仓位约束整理成可追溯的分析报告。
 
 它不是“保证赚钱”的选股工具。与普通行情软件相比，本项目重点是记录每次预测、验证预测是否有效、比较策略并持续模拟记账。使用者可以查看判断依据和不交易原因，开发者可以复现计算和测试。
@@ -14,9 +16,9 @@
 | 四类组合方法 | 等权、风险平价、均值方差、约束评分；是否可正式启用仍由验证决定 |
 | 费用、现金、T+1、交易单位及状态检查 | 已实现；目标仓位与可执行候选计划分开 |
 | 历史回测、样本外验证与模型迭代 | 已实现；候选失败时保留原模型，不保证每日升级 |
-| 连续模拟账户与收益统计 | 已实现；多个独立账本用于策略对照，不动真实资金 |
+| 连续模拟账户与收益统计 | 已实现；当前只展示动态模拟主账户，旧账本仅留历史证据，不动真实资金 |
 | 盘中走势、新闻/公告辅助研究 | 已实现研究路径；使用行情与有时间标记的事件，新闻主要为标题/摘要规则，不等于完整公告语义分析 |
-| 每日总览与详细报告 | 已实现；保留对照报告、研究计划、验证结果和收益记录 |
+| 每日总览与详细报告 | 已实现；默认展示当前策略主账户、研究计划、验证结果和收益记录，旧策略仅保留内部证据 |
 | 定时任务 | 有本地调度入口；安装代码不会自动注册服务，运行电脑须保持可用 |
 | 券商持仓 | 支持导出记录/账户快照导入；不代表实时券商连接 |
 | 真实自动下单 | **未实现、未启用**；当前程序没有真实券商下单通道 |
@@ -38,7 +40,30 @@ flowchart LR
  H --> I
 ```
 
-原始预测与决策层分开：改变仓位预算不应改变模型预测值。盘中动态研究与旧策略使用独立模拟账本做对照；正式模型资格不因模拟收益好就自动获得。
+原始预测与决策层分开：改变仓位预算不应改变模型预测值。当前默认使用一套动态模拟主账户；旧账本仅保留内部依赖与历史证据，不叠加收益。正式模型资格不因模拟收益好就自动获得。
+
+## Workspace layout (文件分类)
+
+The local desktop workspace groups files by purpose, with English names and Chinese notes. Start in `00_Start_Here (使用入口)`. Use the [workspace guide](docs/WORKSPACE_LAYOUT.md) and [file-by-file guide](docs/FILE_GUIDE.md). Runtime paths, algorithms, account records and service schedules are retained. Preview the organization with `python scripts/organize_workspace.py --root .`; apply it with `--apply`. Generated local navigation is excluded from Git.
+
+## Repository and local workspace (仓库与本机分类)
+
+GitHub 保存源代码、测试、公开配置模板和说明；桌面的十个编号分类由同一份 [`config/workspace_layout.json`](config/workspace_layout.json) 生成。分类顺序和用途说明保持一致，GitHub 的默认文件列表仍按平台规则排序。
+
+| Category (分类) | Repository content (仓库内容) |
+|---|---|
+| 00 Start Here (使用入口) | 本 README 与 [文件逐项说明](docs/FILE_GUIDE.md) |
+| 01 Reports (报告与收益) | 仅保留报告生成代码；本地报告不上传 |
+| 02 Source (程序源码) | [`asharequant/`](asharequant/) |
+| 03 Configuration (配置) | [`config/`](config/) 中的公开模板和分类定义；私人配置不上传 |
+| 04 Data (数据与账本) | 数据库、账户、持仓及交易记录仅在本机 |
+| 05 Operations (运行与诊断) | 源码中的调度/诊断入口；本机服务配置和日志不上传 |
+| 06 Tests and Tools (测试与工具) | [`tests/`](tests/)、[`scripts/`](scripts/)、[`tools/`](tools/) |
+| 07 Documentation (说明文档) | [`docs/`](docs/) 与 [`AGENTS.md`](AGENTS.md) |
+| 08 Archives and Backups (历史与回滚) | 备份、历史报告和原始证据仅在本机 |
+| 09 Environment (环境与依赖) | [`requirements.txt`](requirements.txt) 等依赖定义；虚拟环境不上传 |
+
+新克隆默认不含账户数据或报告。分类脚本只为实际存在的目标生成本地链接；本地 HTML 文件指南应在浏览器打开，GitHub 上直接阅读 Markdown 指南。更多发布边界见 [SECURITY.md](docs/SECURITY.md)。
 
 ## 项目目录
 
@@ -54,8 +79,11 @@ asharequant/
   forecast.py         保留路径的特征与收益预测核心
   decision.py         组合分配和交易约束
   lifecycle.py        Champion–Challenger 验证与迭代
-  intraday.py         盘中对照模拟
-  adaptive_intraday.py 盘中动态研究模拟
+  dynamic_service.py  当前动态模拟主服务
+  intraday_inference.py 原参数盘中研究推理
+  order_engine.py     模拟委托、后续报价撮合与账本
+  intraday.py         旧盘中对照及内部兼容
+  adaptive_intraday.py 旧动态账本与迁移证据
   cli.py              命令入口
   daily.py            每日流水线
   scheduler.py        北京时间调度
@@ -84,7 +112,7 @@ python -m asharequant.cli --help
 python -m unittest discover -s tests
 ```
 
-初始化只生成缺少的本地文件，不覆盖已有配置。`watchlist.csv` 示例股票默认禁用；请准备自己的有效观察池并核实上市日期、交易状态与数据覆盖。账户、费率和凭据放本地，不能提交 Git。模板不包含任何真实持仓或真实账户。
+初始化只生成缺少的本地文件，不覆盖已有配置。`watchlist.csv` 示例股票默认禁用；请准备自己的有效观察池并核实上市日期、交易状态与数据覆盖。账户、费率和凭据放本地，不能提交 Git。模板不包含任何真实持仓或真实账户。动态模板初始化为 `dynamic_config.json`，默认关闭；不要直接在空仓库开启，先阅读 [运行前提](docs/DYNAMIC_EXECUTION.md)。
 
 运行入口（在项目目录执行）：
 
@@ -146,3 +174,47 @@ python -m asharequant.cli daily-verify --root .
 仓库当前未指定开源许可证；公开可见不等于授予任意再分发许可。详情见 [安全与发布说明](docs/SECURITY.md)。
 
 整理验收和恢复说明见 [验证记录](docs/VALIDATION.md)。
+
+
+桌面报告保留规则：每个行情日期仅保留最后一次完整生成的报告，按带时区的生成时间判断。新报告完成归档后，较早的桌面副本移入本地 backups/desktop_report_versions，供恢复；不删除预测记录、模拟成交或收益账本。遇到不完整报告先停止清理。
+
+
+当前展示规则：每日总览与桌面仅展示当前新策略，旧策略对照报告入口移除。后台历史账本及新策略依赖的基准数据保留，用于审计和计算；隐藏报告不代表停止全部内部对照计算，不修改原始收益记录。
+
+### 行情驱动研究模拟（2026-10-21）
+
+当前可选执行层是 `dynamic_service`：每30秒获取腾讯/新浪公开报价，检查时间、交叉来源和当日交易状态；每60秒复用保存的模型参数进行研究推理，独立判断是否交易。同股新委托有300秒冷却，120秒未完成自动撤销后重新评估。频率可在 `config/dynamic_config.example.json` 查看。模板默认关闭，启用前需要已有已结算模拟账户和完整本地配置。
+
+模拟委托必须等**后续有效报价**才能撮合；委托、部分成交、完成、撤单和拒单分别记录。费用、T+1、可用现金、盘口量、涨跌停和风险限额继续检查。没有券商自动下单通道，不能把模拟成交当成用户真实成交。
+
+日线模型用于未完成日线仍属未验证的研究用途；不改模型系数、原预测、评分排名或正式准入标准。保存90组原预测的参数重放检查结果与原值一致，不等于证明盘中预测有效。缺少模型输入时仅允许独立风险减仓，行情失效则停止相关撮合。
+
+```sh
+python -m asharequant.dynamic_service poll --root .
+python -m asharequant.dynamic_service status --root .
+python -m asharequant.dynamic_service close --root . --date YYYY-MM-DD
+```
+
+每天18点流程独立结算动态模拟账户并纳入完整总览。`reports/dynamic/latest/` 包含委托、模拟成交、收益和完整证据；`data/dynamic/account.sqlite3` 是独立账本。更多说明见 [动态模拟运行说明](docs/DYNAMIC_EXECUTION.md) 和 [文件逐项说明](docs/文件逐项说明.md)。
+
+
+## 无声 Mac 弹窗提醒
+独立 `asharequant/mac_alerts.py` 每30秒读取动态模拟提醒与健康状态，不调用语言模型，不修改账本。仅服务异常及恢复触发无声对话框；模拟买入、卖出、成交、撤单/拒单不弹窗，仍保留报告与账本记录。委托与成交分别显示；同订单更新合并，超过5分钟注明历史。重复事件按ID抑制，连续两次研究推理异常才提醒；交易时段健康超过120秒未更新提醒一次，恢复再提醒一次。
+对话框120秒后自动关闭；电脑须开机、用户登录且桌面可用，离线或休眠不能保证及时提醒。投递状态独立保存在 `logs/mac_alerts/`，失败重试；崩溃后可能重复提醒，不重复交易。系统接受弹窗不等于用户已经阅读。
+启动：`python -m asharequant.mac_alerts --root .`。服务为 `com.asharequant.mac-alerts`，独立于行情、模型和18点每日分析；停用此服务仅停止本地弹窗。聊天轮询仅在弹窗人工确认后暂停，18点任务保留。
+验证（2026-10-21）：7项通知逻辑测试通过，涵盖去重、部分成交数量、历史卖出、异常/恢复、持续异常、过期健康和无声调用；用户确认无声对话框可见。尚未用真实盘中买卖事件验收。回滚：停止本地提醒服务并恢复聊天轮询，交易算法及账本无须恢复。
+
+
+盘中查看：桌面每日报告目录的“打开动态研究模拟.html”直接显示当前策略实时报告（30秒刷新）。独立 com.asharequant.report-mirror 服务每30秒同步展示副本及附件，无需跨目录跳转；每日导出保持相同展示。页面时间为原报告时间，同步不代表行情更新；同步失败保留旧内容并写入 logs/report_mirror_error.log。2026-10-21 修复旧入口空白，仅修改展示导航。
+
+底部模拟成交、委托、每日收益和完整决策入口均为页内锚点：CSV记录转为可读表格，完整记录为中文字段表格及分层折叠明细，不依赖浏览器打开附件；没有记录明确显示缺项。原始CSV/JSON仍保存在运行报告目录，不更改账本。
+
+2026-10-21 用户更新：关闭所有交易事件弹窗，仅保留异常及恢复提醒；聊天轮询保持暂停，18点分析不变。交易事件仍标记已处理，避免旧消息补发。
+
+完整决策入口默认显示可读字段表格，不直接展示JSON代码；原始记录仍保留在运行目录供审计。
+
+
+报告中文阅读层：reporting/plain_chinese.py 在每日导出与盘中展示时解释已知英文状态，将JSON/CSV链接转换为同目录中文HTML阅读视图，将代码块转为字段表格；保留原始记录。未识别字段保留名称供核查，不编造含义。每日导出检查本地目标和页内锚点；外部网站可用性不由本地校验保证。浏览器显示还需实际打开确认。
+
+
+收益口径：系统只使用动态模拟主账户，持仓、委托、成交、费用和收益来自同一套账本。每日总览直接读取 `data/dynamic/account.sqlite3` 中经过完整性校验的已冻结收盘净值，不再读取券商净值导入表，不要求维护第二个账户。尚未结算的日期明确提示，不能以旧日收益替代。累计收益从本阶段迁移起点计算。模拟记账不代表券商确认的实际成交；用户自行操作资金账户，不自动保证一致。

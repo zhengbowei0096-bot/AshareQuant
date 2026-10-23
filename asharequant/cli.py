@@ -73,7 +73,8 @@ def main(argv=None):
                         result["alerts"].extend(research["alerts"])
                 risk_plan(root)
                 from .intraday import enabled as intraday_enabled,close_day
-                if intraday_enabled(root):
+                from .dynamic_service import enabled as dynamic_enabled
+                if intraday_enabled(root) and not dynamic_enabled(root):
                     intraday_day=json.loads((root/"reports/active_research/latest/report.json").read_text())["asof"]
                     close_day(root,intraday_day)
                     from .adaptive_intraday import enabled as adaptive_enabled,close_day as adaptive_close
