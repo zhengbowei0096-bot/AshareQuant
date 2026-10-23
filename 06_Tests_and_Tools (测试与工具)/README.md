@@ -6,25 +6,11 @@ Tests live in tests/, maintenance commands in scripts/, data comparison and hist
 
 Public source and documentation only. Local runtime records remain on your computer. (这里只发布源码与说明，本机运行记录不上传。)
 
-## Validation_Tools (对比与验收)
-
-| File (文件) | Purpose (用途) |
-|---|---|
-| [tools/compare_sources.py](../tools/compare_sources.py) | Compare preserved historical source snapshots; needs local watchlist and data. Run from the project root with python -m tools.compare_sources. (历史来源对比，不是实时第二行情源。) |
-| [tools/verify_factors.py](../tools/verify_factors.py) | Historical factor acceptance: cache idempotency, first-observed time and original feature count. Reads/writes local data and reports. (历史因子验收，有固定日期假设，运行前核对。) |
-| [tools/verify_models.py](../tools/verify_models.py) | Historical model comparison acceptance: time splits, forecast replay and shadow records. Requires existing comparison results. (模型对比历史验收，需要已有本地报告。) |
-| [tools/verify_risk_models.py](../tools/verify_risk_models.py) | Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。) |
-
-## Regression_Tests (回归测试)
-
-| File (文件) | Purpose (用途) |
-|---|---|
-| [tests/test_execution_regressions.py](../tests/test_execution_regressions.py) | Synthetic tests for lot rounding, immutable model history, time guards and append-only execution upgrades. (股数取整、历史快照、时间校验与追加升级审核测试。) |
-
 ## Files (文件)
 
 | File (文件) | Purpose (用途) |
 |---|---|
+| [tests/test_daily_iteration.py](../tests/test_daily_iteration.py) | Daily research deduplication, actual-outcome timing, frozen validation, recovery and readable report regressions. (每日研究、时序、冻结验证、恢复与报告回归测试。) |
 | [tests/test_active_research.py](../tests/test_active_research.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_adaptive.py](../tests/test_adaptive.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [tests/test_connections.py](../tests/test_connections.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
@@ -70,3 +56,18 @@ Public source and documentation only. Local runtime records remain on your compu
 | [scripts/organize_workspace.py](../scripts/organize_workspace.py) | Configuration initialization and workspace organization. (配置初始化与工作区整理。) |
 | [tools/decision_example.py](../tools/decision_example.py) | Data comparison, historical acceptance tools and decision examples; run modules from the project root. (数据对比、历史验收与示例，均从项目根目录运行。) |
 | [tools/verify_stage1.py](../tools/verify_stage1.py) | Data comparison, historical acceptance tools and decision examples; run modules from the project root. (数据对比、历史验收与示例，均从项目根目录运行。) |
+
+## Validation_Tools (对比与验收)
+
+| File (文件) | Purpose (用途) |
+|---|---|
+| [tools/compare_sources.py](../tools/compare_sources.py) | Compare preserved historical source snapshots; needs local watchlist and data. Run from the project root with python -m tools.compare_sources. (历史来源对比，不是实时第二行情源。) |
+| [tools/verify_factors.py](../tools/verify_factors.py) | Historical factor acceptance: cache idempotency, first-observed time and original feature count. Reads/writes local data and reports. (历史因子验收，有固定日期假设，运行前核对。) |
+| [tools/verify_models.py](../tools/verify_models.py) | Historical model comparison acceptance: time splits, forecast replay and shadow records. Requires existing comparison results. (模型对比历史验收，需要已有本地报告。) |
+| [tools/verify_risk_models.py](../tools/verify_risk_models.py) | Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。) |
+
+## Regression_Tests (回归测试)
+
+| File (文件) | Purpose (用途) |
+|---|---|
+| [tests/test_execution_regressions.py](../tests/test_execution_regressions.py) | Synthetic tests for lot rounding, immutable model history, time guards and append-only execution upgrades. (股数取整、历史快照、时间校验与追加升级审核测试。) |
