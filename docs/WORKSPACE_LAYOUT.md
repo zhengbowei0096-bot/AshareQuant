@@ -1,6 +1,6 @@
 # Workspace Layout (文件分类)
 
-The desktop project opens as ten numbered, English-first categories. Chinese notes explain each purpose. Files are accessed through relative links; the original runtime paths stay in place because services, frozen models and code checks depend on them. This is a presentation reorganization, not a relocation of the trading engine. (桌面按编号分类，通过相对链接访问；后台原路径保留。)
+The desktop project opens with ten numbered, English-first categories plus three directly visible root files: `README.md`, `requirements.txt` and `AGENTS.md`. Chinese notes explain each purpose. Files are accessed through relative links; the original runtime paths stay in place because services, frozen models and code checks depend on them. This is a presentation reorganization, not a relocation of the trading engine. (桌面按编号分类，通过相对链接访问；后台原路径保留。)
 
 | Folder | Purpose |
 |---|---|
@@ -30,7 +30,7 @@ python scripts/organize_workspace.py --root . --apply
 
 The first command previews coverage. Unknown root entries or unclassified Python modules stop the refresh until `config/workspace_layout.json` and file descriptions are updated. The second refreshes generated categories and guides. It refuses to overwrite user-added files, edited links or edited generated guides. Normal growing report/data directories remain in their canonical location; add new functional groups to the layout when functionality changes.
 
-On macOS, original root entries are hidden in Finder so that the categories remain prominent. This does not rename them, change file contents or change Python imports. `Command+Shift+.` reveals Finder-hidden items when investigating the original runtime layout. Other platforms generate the categories without applying Finder flags.
+On macOS, `root_visible_files` keeps the reviewed homepage files visible in Finder, including files hidden by an earlier refresh. Other classified root entries remain hidden so that the categories stay prominent. The list accepts only classified, reviewed public root files; unknown or private files cannot bypass review through this setting. This does not rename them, change file contents or change Python imports. `Command+Shift+.` reveals Finder-hidden items when investigating the original runtime layout. Other platforms generate the categories without applying Finder flags.
 
 `--clean-cache` removes only Python bytecode (`.pyc`/`.pyo`) and Finder metadata in the active source/test/tool/vendor trees. A verified ZIP is written before removal. Caches can be regenerated during normal execution, so they may reappear. Logs, credentials, certificates, dependency code, frozen reports, account databases and research evidence are retained. (只清理可再生成缓存，不删日志、账户或研究证据。)
 
@@ -50,7 +50,7 @@ Validated on 2026-10-23: reversible organization, complete Python source classif
 
 ## GitHub synchronization (GitHub同步)
 
-The public repository is GuanlanQuant; the runtime package and established local paths remain AshareQuant / `asharequant`. The repository contains the same category definition, maintenance script and file guides as the desktop workspace. Markdown source links open directly on GitHub; HTML guides are intended for local browsers. The ten numbered category folders are also present on GitHub, each with a clickable README. GitHub continues to show canonical source folders below the categories because it has no Finder-style hide flag. Fingerprint-bound source files are not moved.
+The public repository is GuanlanQuant; the runtime package and established local paths remain AshareQuant / `asharequant`. The repository contains the same category definition, maintenance script and file guides as the desktop workspace. Markdown source links open directly on GitHub; HTML guides are intended for local browsers. The ten numbered category folders are also present on GitHub, each with a clickable README. GitHub keeps the root README and dependency/maintenance files in their standard locations, renders README below the repository file list, and exposes quick links at the beginning of README. It also shows canonical source folders because it has no Finder-style hide flag. Fingerprint-bound source files are not moved.
 
 Private categories publish their implementation links and purpose only. Account databases, holdings, credentials, logs, reports, snapshots, backups, installed service files and generated navigation links are excluded from publication. Only each category’s public `README.md` is tracked; local `00_README.*`, launchers, symlinks and ownership metadata remain ignored. A fresh clone has no account or report data; missing local-only targets are skipped when building links. Optional `.venv` and `venv` folders belong to Environment and stay private.
 

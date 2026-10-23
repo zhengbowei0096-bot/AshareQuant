@@ -2,6 +2,14 @@
 
 Desktop workspace: numbered English categories; runtime paths are retained for services and integrity checks. (桌面按编号英文分类，服务路径与完整性检查保持原位。)
 
+## Project home (项目首页)
+
+These files remain directly visible beside the ten categories. (以下文件与十个分类并列展示，无需展开文件夹。)
+
+- [README.md](../README.md) — What the project does and how to run it. (项目用途与运行方法。)
+- [requirements.txt](../requirements.txt) — Dependency versions for installation/reproduction. (安装与复现用依赖版本。)
+- [AGENTS.md](../AGENTS.md) — Required rules for future code, documentation and navigation changes. (后续代码、说明和导航同步规则。)
+
 ## 00_Start_Here (使用入口)
 
 Start with the guide, daily overview and live account. (先看指南、每日总览和实时账户。)
