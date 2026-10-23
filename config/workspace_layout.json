@@ -719,6 +719,12 @@
           "subfolder": "06_Reporting (报告展示)"
         },
         {
+          "target": "asharequant/reporting/dynamic_status.py",
+          "label": "dynamic_status.py",
+          "purpose": "Reporting module: dynamic_status.py (只读核验盘中判断证据，显示具体异常、最近成功与恢复时间；缺失、覆盖不全或校验失败时解释原因，不展示空表。)",
+          "subfolder": "06_Reporting (报告展示)"
+        },
+        {
           "target": "asharequant/reporting/model_activity.py",
           "label": "model_activity.py",
           "purpose": "Read-only sealed training evidence, actual trial adoption and independent acceptance panels. (只读封存训练证据，分栏显示实际试用和独立验收，不重训或改账本。)",
@@ -745,7 +751,7 @@
         {
           "target": "asharequant/dynamic_service.py",
           "label": "01_dynamic_service.py",
-          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。)",
+          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) 报告保留最近盘中异常与经核验的恢复状态，休市不表示已恢复。",
           "subfolder": "07_Operations (自动运行)"
         },
         {
@@ -1569,7 +1575,7 @@
         {
           "target": "asharequant/dynamic_service.py",
           "label": "dynamic_service.py",
-          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。)",
+          "purpose": "Operations module: dynamic_service.py (行情驱动模拟、收盘结算、中文撤单原因；执行代码升级追加审核记录，不覆盖历史账本。) 报告保留最近盘中异常与经核验的恢复状态，休市不表示已恢复。",
           "subfolder": "Implementation and Guides (功能与使用说明)"
         },
         {
@@ -1959,6 +1965,7 @@
       "asharequant/report_navigation.py",
       "asharequant/reporting/__init__.py",
       "asharequant/reporting/daily_bundle.py",
+      "asharequant/reporting/dynamic_status.py",
       "asharequant/reporting/holding_summary.py",
       "asharequant/reporting/iteration_status.py",
       "asharequant/reporting/model_activity.py",
@@ -2026,6 +2033,7 @@
       "tests/test_database.py",
       "tests/test_decision.py",
       "tests/test_dynamic_execution.py",
+      "tests/test_dynamic_status.py",
       "tests/test_execution_regressions.py",
       "tests/test_factor_research.py",
       "tests/test_factors.py",
