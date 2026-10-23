@@ -2,9 +2,18 @@
 
 [Project home (项目首页)](../README.md) · [File guide (文件说明)](../docs/FILE_GUIDE.md)
 
-Automated tests and explicit maintenance tools; verification scripts can have side effects. (自动测试与维护工具，验收脚本可能联网或写记录。)
+Tests live in tests/, maintenance commands in scripts/, data comparison and historical acceptance in tools/. Some tools read or write local records. (测试、维护、对比及历史验收分别归类，执行前核对说明。)
 
 Public source and documentation only. Local runtime records remain on your computer. (这里只发布源码与说明，本机运行记录不上传。)
+
+## Validation_Tools (对比与验收)
+
+| File (文件) | Purpose (用途) |
+|---|---|
+| [tools/compare_sources.py](../tools/compare_sources.py) | Compare preserved historical source snapshots; needs local watchlist and data. Run from the project root with python -m tools.compare_sources. (历史来源对比，不是实时第二行情源。) |
+| [tools/verify_factors.py](../tools/verify_factors.py) | Historical factor acceptance: cache idempotency, first-observed time and original feature count. Reads/writes local data and reports. (历史因子验收，有固定日期假设，运行前核对。) |
+| [tools/verify_models.py](../tools/verify_models.py) | Historical model comparison acceptance: time splits, forecast replay and shadow records. Requires existing comparison results. (模型对比历史验收，需要已有本地报告。) |
+| [tools/verify_risk_models.py](../tools/verify_risk_models.py) | Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。) |
 
 ## Files (文件)
 
@@ -53,18 +62,5 @@ Public source and documentation only. Local runtime records remain on your compu
 | [tests/test_workspace_organization.py](../tests/test_workspace_organization.py) | Regression and integrity checks, run with unittest. (回归与完整性检查。) |
 | [scripts/init_config.py](../scripts/init_config.py) | Configuration initialization and workspace organization. (配置初始化与工作区整理。) |
 | [scripts/organize_workspace.py](../scripts/organize_workspace.py) | Configuration initialization and workspace organization. (配置初始化与工作区整理。) |
-| [tools/decision_example.py](../tools/decision_example.py) | Existing data verification and decision examples. (已有数据验证工具与决策示例。) |
-| [tools/verify_stage1.py](../tools/verify_stage1.py) | Existing data verification and decision examples. (已有数据验证工具与决策示例。) |
-
-## Root_Entry_Points (兼容与验收入口)
-
-| File (文件) | Purpose (用途) |
-|---|---|
-| [check_data.py](../check_data.py) | Compatibility or validation entry: check_data.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [compare_sources.py](../compare_sources.py) | Compatibility or validation entry: compare_sources.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [market_data.py](../market_data.py) | Compatibility or validation entry: market_data.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [market_data_tx.py](../market_data_tx.py) | Compatibility or validation entry: market_data_tx.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [update_watchlist.py](../update_watchlist.py) | Compatibility or validation entry: update_watchlist.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [verify_factors.py](../verify_factors.py) | Compatibility or validation entry: verify_factors.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [verify_models.py](../verify_models.py) | Compatibility or validation entry: verify_models.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
-| [verify_risk_models.py](../verify_risk_models.py) | Compatibility or validation entry: verify_risk_models.py. Inspect before running. (兼容或验收入口，执行前查看说明。) |
+| [tools/decision_example.py](../tools/decision_example.py) | Data comparison, historical acceptance tools and decision examples; run modules from the project root. (数据对比、历史验收与示例，均从项目根目录运行。) |
+| [tools/verify_stage1.py](../tools/verify_stage1.py) | Data comparison, historical acceptance tools and decision examples; run modules from the project root. (数据对比、历史验收与示例，均从项目根目录运行。) |
