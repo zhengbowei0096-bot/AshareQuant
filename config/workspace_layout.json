@@ -17,6 +17,26 @@
           "purpose": "Ordered guide to source files and workspace categories. (按顺序解释文件用途。)",
           "subfolder": ""
         }
+      ],
+      "public_links": [
+        {
+          "target": "docs/WORKSPACE_LAYOUT.md",
+          "label": "WORKSPACE_LAYOUT.md",
+          "purpose": "Workspace categories, refresh and recovery. (分类使用、刷新与恢复方法。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/DYNAMIC_EXECUTION.md",
+          "label": "DYNAMIC_EXECUTION.md",
+          "purpose": "Dynamic paper execution, prerequisites and limitations. (动态模拟执行、运行前提与限制。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "scripts/init_config.py",
+          "label": "init_config.py",
+          "purpose": "Create missing example settings without overwriting existing settings. (生成缺少的示例配置，不覆盖已有设置。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
       ]
     },
     {
@@ -353,7 +373,40 @@
           "purpose": "Saved report or diagnostic evidence; read its timestamp. (保存的报告或诊断证据，请核对日期。)",
           "subfolder": "Historical_Diagnostics (历史诊断)"
         }
-      ]
+      ],
+      "public_links": [
+        {
+          "target": "asharequant/reporting/daily_bundle.py",
+          "label": "daily_bundle.py",
+          "purpose": "Reporting module: reporting/daily_bundle.py (只读主动态账本核算已结算收益，按日期汇总预测与每日报告，默认只展示当前策略；同日只留最新报告，旧版本移至备份。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/reporting/plain_chinese.py",
+          "label": "plain_chinese.py",
+          "purpose": "Reporting module: reporting/plain_chinese.py (报告中文阅读层：解释状态、生成附件阅读表格，将旧空收益入口改为同一归档的动态主账户结算，说明缺项；检查本地链接。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/reporting/report_navigation.py",
+          "label": "report_navigation.py",
+          "purpose": "Reporting module: reporting/report_navigation.py (管理完整总览与动态模拟入口，每30秒同步桌面实时展示及附件，隐藏旧策略；不修改模型或账本。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/reporting/report.py",
+          "label": "report.py",
+          "purpose": "Reporting module: reporting/report.py (生成主要分析网页、图表和指标展示。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/DYNAMIC_EXECUTION.md",
+          "label": "DYNAMIC_EXECUTION.md",
+          "purpose": "Dynamic paper execution, prerequisites and limitations. (动态模拟执行、运行前提与限制。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
+      ],
+      "public_note": "Report generation is included; actual reports and returns are generated locally after a valid run. (包含报告功能，实际报告与收益在本机有效运行后生成。)"
     },
     {
       "name": "02_Source (程序源码)",
@@ -845,7 +898,8 @@
           "purpose": "Compatibility module: risk/__init__.py (Python 包标识，标明该目录属于程序包；不负责独立预测或下单。)",
           "subfolder": "08_Compatibility (兼容入口)"
         }
-      ]
+      ],
+      "public_links": []
     },
     {
       "name": "03_Configuration (配置)",
@@ -941,7 +995,9 @@
           "purpose": "Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。)",
           "subfolder": ""
         }
-      ]
+      ],
+      "public_links": [],
+      "public_note": "Only non-sensitive examples are published. Initialize your own settings before use. (只发布非敏感模板，使用前初始化本机配置。)"
     },
     {
       "name": "04_Data (数据与账本)",
@@ -1139,7 +1195,52 @@
           "purpose": "Model versions, monitoring and frozen validation history. (模型版本、监控和冻结验证历史。)",
           "subfolder": "Model_Records (模型记录)"
         }
-      ]
+      ],
+      "public_links": [
+        {
+          "target": "asharequant/data.py",
+          "label": "data.py",
+          "purpose": "Data module: data.py (日历、历史行情增量更新、批量更新及报价获取。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/data_sources/database.py",
+          "label": "database.py",
+          "purpose": "Data module: data_sources/database.py (把校验后的行情快照同步到 SQLite 数据库，避免重复导入。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/data_sources/broker_records.py",
+          "label": "broker_records.py",
+          "purpose": "Data module: data_sources/broker_records.py (读取本地券商 CSV 导出记录；导入文件不等于实时连接券商。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/history_sources.py",
+          "label": "history_sources.py",
+          "purpose": "Data module: history_sources.py (历史数据及执行状态证据获取，保留来源；未知公司行动不当作没有发生。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/intraday_data.py",
+          "label": "intraday_data.py",
+          "purpose": "Data module: intraday_data.py (盘中模拟所需的报价、交易日和公司行动参考资料及质量检查。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/order_engine.py",
+          "label": "order_engine.py",
+          "purpose": "Execution and Ledger module: order_engine.py (动态模拟委托生命周期、后续报价撮合、T+1、资金预留、部分成交费用及阶段盈亏；无真实券商通道。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/SECURITY.md",
+          "label": "SECURITY.md",
+          "purpose": "Publication boundaries and private data handling. (发布边界与私人数据保护。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
+      ],
+      "public_note": "Data retrieval, storage and paper ledger code is included. Accounts, holdings, market caches and transaction records are private. (保留取数、存储及模拟账本功能，账户、持仓、行情缓存与成交记录不上传。)"
     },
     {
       "name": "05_Operations (运行与诊断)",
@@ -1421,7 +1522,52 @@
           "purpose": "Legacy monitor link; use the live-account launcher for the current report. (原盯盘链接，当前报告请用实时账户入口。)",
           "subfolder": "Legacy_Launchers (旧入口记录)"
         }
-      ]
+      ],
+      "public_links": [
+        {
+          "target": "asharequant/cli.py",
+          "label": "cli.py",
+          "purpose": "Operations module: cli.py (统一命令入口：分派 run、daily、forecast、decision、paper-account 等任务。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/daily.py",
+          "label": "daily.py",
+          "purpose": "Operations module: daily.py (每日工作流水线：依次组织数据、分析、模拟账本、模型评估、验证和检查；记录步骤状态。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/scheduler.py",
+          "label": "scheduler.py",
+          "purpose": "Operations module: scheduler.py (本地定时服务唤醒后的检查器：按北京时间和交易日判断是否应运行，记录尝试及结果；不能自行唤醒关机电脑。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/dynamic_service.py",
+          "label": "dynamic_service.py",
+          "purpose": "Operations module: dynamic_service.py (每30秒行情驱动模拟服务、研究推理、订单账本、收盘结算、报告和手动账户差异核对；只模拟。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/mac_alerts.py",
+          "label": "mac_alerts.py",
+          "purpose": "Operations module: mac_alerts.py (独立无声 Mac 弹窗：仅提醒服务异常及恢复，交易事件不弹窗；不调用模型、不修改账本。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "asharequant/evaluation/connection_health.py",
+          "label": "connection_health.py",
+          "purpose": "Validation module: evaluation/connection_health.py (汇总数据连接及无人值守流程准备状态，保存检查证据。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/DYNAMIC_EXECUTION.md",
+          "label": "DYNAMIC_EXECUTION.md",
+          "purpose": "Dynamic paper execution, prerequisites and limitations. (动态模拟执行、运行前提与限制。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
+      ],
+      "public_note": "Scheduling and diagnostics code is included. Services must be installed locally; private service files and logs are excluded. (提供调度与诊断代码，服务须本机部署，私人服务文件和日志不上传。)"
     },
     {
       "name": "06_Tests_and_Tools (测试与工具)",
@@ -1499,7 +1645,8 @@
           "purpose": "Compatibility or validation entry: verify_risk_models.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
           "subfolder": "Root_Entry_Points (兼容与验收入口)"
         }
-      ]
+      ],
+      "public_links": []
     },
     {
       "name": "07_Documentation (说明文档)",
@@ -1577,7 +1724,8 @@
           "purpose": "Historical implementation or research note; dated claims are not current test results. (历史开发或研究说明，过去验收不代表本次通过。)",
           "subfolder": "Historical_Notes (历史说明)"
         }
-      ]
+      ],
+      "public_links": []
     },
     {
       "name": "08_Archives_and_Backups (历史与回滚)",
@@ -1601,7 +1749,34 @@
           "purpose": "Isolated code experiments and validation evidence. (隔离代码实验与验证证据。)",
           "subfolder": ""
         }
-      ]
+      ],
+      "public_links": [
+        {
+          "target": "asharequant/work_archive.py",
+          "label": "work_archive.py",
+          "purpose": "Operations module: work_archive.py (按工作日期保存运行记录、源码快照和报告关联，供追溯和恢复。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "scripts/organize_workspace.py",
+          "label": "organize_workspace.py",
+          "purpose": "Preview, refresh and restore workspace navigation. (预览、刷新和恢复分类导航。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/VALIDATION.md",
+          "label": "VALIDATION.md",
+          "purpose": "Dated verification evidence and recovery instructions. (按日期记录的验证范围与恢复说明。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        },
+        {
+          "target": "docs/SECURITY.md",
+          "label": "SECURITY.md",
+          "purpose": "Publication boundaries and private data handling. (发布边界与私人数据保护。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
+      ],
+      "public_note": "Recovery tools and instructions are included. Local backup archives and frozen account evidence are not published. (提供恢复工具与说明，本机备份及冻结账户证据不上传。)"
     },
     {
       "name": "09_Environment (环境与依赖)",
@@ -1661,7 +1836,16 @@
           "purpose": "Optional local Python environment; recreate from dependency definitions, never publish. (本机可选Python环境，可由依赖说明重建，不上传。)",
           "subfolder": ""
         }
-      ]
+      ],
+      "public_links": [
+        {
+          "target": ".gitignore",
+          "label": ".gitignore",
+          "purpose": "Exclude local accounts, keys, reports and generated artifacts from Git. (Git 排除规则；网页手动上传仍须检查文件。)",
+          "subfolder": "Implementation and Guides (功能与使用说明)"
+        }
+      ],
+      "public_note": "Dependency definitions are public; installed environments, third-party bundles and private certificates stay local. (依赖定义公开，已安装环境、第三方库副本和私人证书留在本机。)"
     }
   ],
   "metadata_names": [
@@ -1684,5 +1868,175 @@
       "subfolder": "Run_Snapshots (历次运行快照)",
       "purpose": "Frozen run snapshot; retained as historical evidence. (冻结运行快照，保留历史证据。)"
     }
-  ]
+  ],
+  "public_navigation": {
+    "version": 1,
+    "description": "Reviewed public files for the ten GitHub categories. Runtime-only files and generated links are never published. (十类公开导航的审核清单，不发布私人数据或本机生成链接。)",
+    "files": [
+      ".gitignore",
+      "AGENTS.md",
+      "README.md",
+      "asharequant/__init__.py",
+      "asharequant/active_execution.py",
+      "asharequant/active_research.py",
+      "asharequant/adaptive_intraday.py",
+      "asharequant/adaptive_policy.py",
+      "asharequant/backtesting/__init__.py",
+      "asharequant/backtesting/research.py",
+      "asharequant/broker_records.py",
+      "asharequant/cli.py",
+      "asharequant/code_guard.py",
+      "asharequant/compare.py",
+      "asharequant/connection_health.py",
+      "asharequant/connections.py",
+      "asharequant/core.py",
+      "asharequant/daily.py",
+      "asharequant/daily_bundle.py",
+      "asharequant/data.py",
+      "asharequant/data_sources/__init__.py",
+      "asharequant/data_sources/broker_records.py",
+      "asharequant/data_sources/database.py",
+      "asharequant/database.py",
+      "asharequant/decision.py",
+      "asharequant/dynamic_service.py",
+      "asharequant/evaluation/__init__.py",
+      "asharequant/evaluation/connection_health.py",
+      "asharequant/evaluation/factor_research.py",
+      "asharequant/evaluation/prediction_quality.py",
+      "asharequant/evaluation/validation_readiness.py",
+      "asharequant/execution_replay.py",
+      "asharequant/factor_research.py",
+      "asharequant/factors.py",
+      "asharequant/forecast.py",
+      "asharequant/history_sources.py",
+      "asharequant/holding_summary.py",
+      "asharequant/indices.py",
+      "asharequant/intraday.py",
+      "asharequant/intraday_data.py",
+      "asharequant/intraday_events.py",
+      "asharequant/intraday_inference.py",
+      "asharequant/iteration.py",
+      "asharequant/lifecycle.py",
+      "asharequant/mac_alerts.py",
+      "asharequant/model_candidates.py",
+      "asharequant/model_monitor.py",
+      "asharequant/model_research.py",
+      "asharequant/models/__init__.py",
+      "asharequant/next_session_plan.py",
+      "asharequant/order_engine.py",
+      "asharequant/paper_account.py",
+      "asharequant/portfolio_validation.py",
+      "asharequant/prediction_quality.py",
+      "asharequant/probability_calibration.py",
+      "asharequant/probability_display.py",
+      "asharequant/public_history.py",
+      "asharequant/report.py",
+      "asharequant/report_navigation.py",
+      "asharequant/reporting/__init__.py",
+      "asharequant/reporting/daily_bundle.py",
+      "asharequant/reporting/holding_summary.py",
+      "asharequant/reporting/plain_chinese.py",
+      "asharequant/reporting/probability_display.py",
+      "asharequant/reporting/report.py",
+      "asharequant/reporting/report_navigation.py",
+      "asharequant/research.py",
+      "asharequant/research_execution.py",
+      "asharequant/research_paper.py",
+      "asharequant/research_policy.py",
+      "asharequant/risk/__init__.py",
+      "asharequant/risk/risk_control.py",
+      "asharequant/risk_control.py",
+      "asharequant/risk_models.py",
+      "asharequant/scheduler.py",
+      "asharequant/seven_metrics.py",
+      "asharequant/strategies/__init__.py",
+      "asharequant/strategies/next_session_plan.py",
+      "asharequant/strategy_experiment.py",
+      "asharequant/strict_validation.py",
+      "asharequant/validation_engine.py",
+      "asharequant/validation_readiness.py",
+      "asharequant/work_archive.py",
+      "asharequant/worker.py",
+      "check_data.py",
+      "compare_sources.py",
+      "config/active_research_config.example.json",
+      "config/adaptive_config.example.json",
+      "config/config.example.json",
+      "config/decision_config.example.json",
+      "config/dynamic_config.example.json",
+      "config/forecast_config.example.json",
+      "config/intraday_config.example.json",
+      "config/monitor_config.example.json",
+      "config/report_delivery_config.example.json",
+      "config/research_paper_config.example.json",
+      "config/seven_metrics_config.example.json",
+      "config/strategy_experiment_config.example.json",
+      "config/watchlist.example.csv",
+      "config/workspace_layout.json",
+      "docs/ARCHITECTURE.md",
+      "docs/DYNAMIC_EXECUTION.md",
+      "docs/FILE_GUIDE.html",
+      "docs/FILE_GUIDE.md",
+      "docs/SECURITY.md",
+      "docs/VALIDATION.md",
+      "docs/WORKSPACE_LAYOUT.md",
+      "docs/文件逐项说明.html",
+      "docs/文件逐项说明.md",
+      "market_data.py",
+      "market_data_tx.py",
+      "requirements-models.lock.txt",
+      "requirements-risk-models.lock.txt",
+      "requirements-stage1.lock.txt",
+      "requirements.txt",
+      "scripts/init_config.py",
+      "scripts/organize_workspace.py",
+      "tests/test_active_research.py",
+      "tests/test_adaptive.py",
+      "tests/test_connections.py",
+      "tests/test_connectivity.py",
+      "tests/test_corporate_ledger.py",
+      "tests/test_daily_acceptance.py",
+      "tests/test_daily_bundle.py",
+      "tests/test_database.py",
+      "tests/test_decision.py",
+      "tests/test_dynamic_execution.py",
+      "tests/test_factor_research.py",
+      "tests/test_factors.py",
+      "tests/test_forecast.py",
+      "tests/test_history_retries.py",
+      "tests/test_history_sources.py",
+      "tests/test_holding_summary.py",
+      "tests/test_indices.py",
+      "tests/test_intraday.py",
+      "tests/test_iteration.py",
+      "tests/test_iteration_null_candidate.py",
+      "tests/test_layout.py",
+      "tests/test_lifecycle.py",
+      "tests/test_mac_alerts.py",
+      "tests/test_model_candidates.py",
+      "tests/test_model_monitor.py",
+      "tests/test_next_session_plan.py",
+      "tests/test_paper_account.py",
+      "tests/test_plain_chinese.py",
+      "tests/test_prediction_quality.py",
+      "tests/test_real_fees.py",
+      "tests/test_report_navigation.py",
+      "tests/test_research_paper.py",
+      "tests/test_research_policy.py",
+      "tests/test_risk_control.py",
+      "tests/test_risk_models.py",
+      "tests/test_seven_metrics.py",
+      "tests/test_strategy_experiment.py",
+      "tests/test_strict_validation.py",
+      "tests/test_system.py",
+      "tests/test_work_archive.py",
+      "tests/test_workspace_organization.py",
+      "tools/decision_example.py",
+      "tools/verify_stage1.py",
+      "update_watchlist.py",
+      "verify_factors.py",
+      "verify_models.py",
+      "verify_risk_models.py"
+    ]
+  }
 }
