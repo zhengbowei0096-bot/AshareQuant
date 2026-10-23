@@ -116,7 +116,7 @@ def main(argv=None):
             if args.input is None:raise ValueError('code-guard需要JSON操作文件')
             print(json.dumps(dispatch(root,json.loads(args.input.read_text())),ensure_ascii=False,indent=2));return 0
         if args.command=='iteration':
-            from .iteration import run
+            from .daily_iteration import run
             with run_lock(root):result=run(root)
             print(json.dumps({k:v for k,v in result.items() if k not in ('drift','studies','update_history')},ensure_ascii=False,indent=2))
             return 2 if result['errors'] else 0
@@ -284,7 +284,7 @@ def main(argv=None):
                     issues.append({'symbol':'七项指标交易状态','error':str(exc)})
                 from .lifecycle import run as run_lifecycle
                 run_lifecycle(root)
-                from .iteration import run as run_iteration
+                from .daily_iteration import run as run_iteration
                 iteration_result=run_iteration(root)
                 issues.extend(iteration_result['errors'])
                 from .forecast import generate
