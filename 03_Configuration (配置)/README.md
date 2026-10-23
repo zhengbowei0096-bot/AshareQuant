@@ -15,6 +15,9 @@ Only non-sensitive examples are published. Initialize your own settings before u
 | [config/config.example.json](../config/config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
 | [config/decision_config.example.json](../config/decision_config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
 | [config/dynamic_config.example.json](../config/dynamic_config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
+| [config/environments/requirements-models.lock.txt](../config/environments/requirements-models.lock.txt) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
+| [config/environments/requirements-risk-models.lock.txt](../config/environments/requirements-risk-models.lock.txt) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
+| [config/environments/requirements-stage1.lock.txt](../config/environments/requirements-stage1.lock.txt) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
 | [config/forecast_config.example.json](../config/forecast_config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
 | [config/intraday_config.example.json](../config/intraday_config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
 | [config/monitor_config.example.json](../config/monitor_config.example.json) | Configuration templates plus workspace layout definition. (配置模板与工作区分类定义。) |
