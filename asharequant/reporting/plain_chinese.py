@@ -5,7 +5,11 @@ from urllib.parse import urlsplit,unquote,quote
 from bs4 import BeautifulSoup
 from ..core import atomic_text
 
-WORDS = dict(x.split('=',1) for x in '''RESEARCH_ONLY=仅供研究，尚未正式验证
+WORDS = dict(x.split('=',1) for x in '''RESEARCH_TRIAL=研究试用，独立验证尚未完成
+PREDICTIVE_PROCEDURE_VALIDATED_RESEARCH_EXECUTION=预测方案通过独立验证，交易仍为研究模拟
+RESEARCH_TRIAL_ONLY=仅研究试用
+PREDICTION_RECIPE_ONLY=仅预测方案验证通过
+RESEARCH_ONLY=仅供研究，尚未正式验证
 REFERENCE_ONLY=仅供参考
 NO_VALIDATED_MODEL_RELEASE=尚无通过验证的正式模型
 NO_VALIDATED_PORTFOLIO_RELEASE=尚无通过验证的正式组合策略
