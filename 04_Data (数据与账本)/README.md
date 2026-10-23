@@ -15,5 +15,5 @@ Data retrieval, storage and paper ledger code is included. Accounts, holdings, m
 | [asharequant/data_sources/broker_records.py](../asharequant/data_sources/broker_records.py) | Data module: data_sources/broker_records.py (读取本地券商 CSV 导出记录；导入文件不等于实时连接券商。) |
 | [asharequant/history_sources.py](../asharequant/history_sources.py) | Data module: history_sources.py (历史数据及执行状态证据获取，保留来源；未知公司行动不当作没有发生。) |
 | [asharequant/intraday_data.py](../asharequant/intraday_data.py) | Data module: intraday_data.py (盘中模拟所需的报价、交易日和公司行动参考资料及质量检查。) |
-| [asharequant/order_engine.py](../asharequant/order_engine.py) | Execution and Ledger module: order_engine.py (动态模拟委托生命周期、后续报价撮合、T+1、资金预留、部分成交费用及阶段盈亏；无真实券商通道。) |
+| [asharequant/order_engine.py](../asharequant/order_engine.py) | Execution and Ledger module: order_engine.py (动态模拟委托、稳定整手换算、后续报价撮合、T+1、费用及盈亏；无真实券商通道。) |
 | [docs/SECURITY.md](../docs/SECURITY.md) | Publication boundaries and private data handling. (发布边界与私人数据保护。) |
