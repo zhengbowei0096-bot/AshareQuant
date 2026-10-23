@@ -108,3 +108,7 @@ python -m asharequant.dynamic_service reconcile --root . --snapshot path/to/manu
 回滚同样需要停服务和备份：恢复已保存源码后追加相应的回滚审核记录；若回滚到不支持审核链的旧程序，必须先核对它与初始指纹一致，并保留所有升级记录。不得通过改初始元数据、删除成交记录或回填成交来绕过版本检查。
 
 这些修复不取消股票行情及公司行为校验。任一模型所需股票输入尚不可靠时，当前原有整组推理仍暂停，只保留独立风险检查；不能把回放测试通过描述为真实开盘验收通过。
+
+## Per-slot research trials (分组研究试用)
+
+The daily source may carry a different reviewed ridge recipe for each stock and prediction horizon. Intraday inference reads `model_features` from each daily forecast, falling back to the original common feature set for old records. It continues to reuse daily fitted parameters and does not retrain on each quote. A trial or daily prediction release does not validate unfinished daily bars or grant trading/probability admission. See [MODEL_UPGRADES.md](MODEL_UPGRADES.md).
