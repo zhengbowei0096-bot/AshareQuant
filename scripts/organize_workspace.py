@@ -5,6 +5,7 @@ original root entries are hidden from Finder; Python paths stay unchanged.
 """
 from pathlib import Path
 import argparse, datetime, hashlib, html, json, os, shlex, shutil, stat, sys, zipfile
+from urllib.parse import quote
 
 MARKER='.workspace-category.json'
 STATE='.workspace-layout.json'
@@ -58,10 +59,55 @@ def build_files(root,g):
         files[sub+'/00_README.txt']=sub+'\n\n'+''.join(Path(r).name+' — '+e['purpose']+'\n\n' for r,e in entries)
     return files,links
 
-def check_owned(folder):
+def public_readmes(root,layout):
+    """Build identical public category pages from an explicitly reviewed file list.
+
+    Local account/config/report inventories never become public links. No file
+    content, absolute path, interpreter path or generated symlink is published.
+    """
+    public=layout.get('public_navigation')
+    if public is None:return {}
+    allowed=set(public['files'])
+    private={'data','logs','reports','backups','archive','automation','credentials','certs','vendor','work','outputs','code_experiments'}
+    for name in allowed:
+        p=safe_relative(name);target=root/p
+        if p.parts[0] in private or p.suffix in {'.db','.sqlite','.sqlite3','.key','.pem','.token','.log','.pkl','.joblib'}:
+            raise ValueError('Private target in public navigation: '+name)
+        if len(p.parts)==1 and (name.endswith('_config.json') or name in {'config.json','watchlist.csv'} or (name.startswith('.') and name!='.gitignore')):
+            raise ValueError('Private target in public navigation: '+name)
+        if not target.is_file() or target.is_symlink() or not target.resolve().is_relative_to(root.resolve()):
+            raise ValueError('Missing or unsafe public target: '+name)
+    pages={};covered=set()
+    for g in layout['groups']:
+        entries=[];seen=set()
+        for e in g['entries']+g.get('public_links',[]):
+            target=e['target'];safe_relative(target)
+            names=[target] if target in allowed else sorted(n for n in allowed if n.startswith(target+'/'))
+            for name in names:
+                if name in seen:continue
+                seen.add(name);covered.add(name);entries.append((name,e))
+        text='# '+g['name']+'\n\n[Project home (项目首页)](../README.md) · [File guide (文件说明)](../docs/FILE_GUIDE.md)\n\n'+g['purpose']+'\n\n'
+        text+=g.get('public_note','Public source and documentation only. Local runtime records remain on your computer. (这里只发布源码与说明，本机运行记录不上传。)')+'\n\n'
+        for sub in dict.fromkeys(e.get('subfolder','') for _,e in entries):
+            text+='## '+(sub or 'Files (文件)')+'\n\n| File (文件) | Purpose (用途) |\n|---|---|\n'
+            for name,e in entries:
+                if e.get('subfolder','')!=sub:continue
+                text+='| ['+name+'](../'+quote(name,safe='/')+') | '+e['purpose'].replace('|','\\|').replace('\n',' ')+' |\n'
+            text+='\n'
+        pages[g['name']+'/README.md']=text.rstrip()+'\n'
+    if allowed-covered:raise ValueError('Unclassified public files: '+', '.join(sorted(allowed-covered)))
+    return pages
+
+def check_owned(folder,public_readme=None):
     if not folder.exists():return
     marker=folder/MARKER
-    if not marker.is_file():raise ValueError('Unmanaged category exists: '+str(folder))
+    if not marker.is_file():
+        # A fresh clone contains the reviewed public README only. It can be
+        # expanded into local navigation, but user edits must never be erased.
+        entries={p.name for p in folder.iterdir()}- {'.DS_Store'}
+        readme=folder/'README.md'
+        if public_readme is not None and entries=={'README.md'} and not readme.is_symlink() and readme.is_file() and readme.read_text()==public_readme:return
+        raise ValueError('Unmanaged category exists: '+str(folder))
     previous=json.loads(marker.read_text())
     expected=set(previous['files'])|set(previous['links'])|{MARKER}
     for p in folder.rglob('*'):
@@ -85,6 +131,10 @@ def generate_guide(root,layout):
     body='<p>Numbered categories match the desktop workspace. Source files stay in their existing locations. (编号与桌面一致，源码保留原位置。)</p>'
     for g in layout['groups']:
         md+='## '+g['name']+'\n\n'+g['purpose']+'\n\n';body+='<h2>'+html.escape(g['name'])+'</h2><p>'+html.escape(g['purpose'])+'</p>'
+        if layout.get('public_navigation'):
+            href='../'+quote(g['name'],safe='')+'/README.md'
+            md+='[Open category (打开分类)]('+href+')\n\n'
+            body+='<p><a href="'+href+'">Open category (打开分类)</a></p>'
         if not g['name'].startswith('02_'):continue
         for sub in dict.fromkeys(e.get('subfolder','') for e in g['entries']):
             md+='### '+sub+'\n\n| File (文件) | Purpose (用途) |\n|---|---|\n';body+='<h3>'+html.escape(sub)+'</h3><table><tr><th>File (文件)</th><th>Purpose (用途)</th></tr>'
@@ -99,7 +149,8 @@ def generate_guide(root,layout):
 
 def apply(root,clean_cache=False):
     root=Path(root).resolve();layout=load_plan(root)
-    for g in layout['groups']:check_owned(root/g['name'])
+    public=public_readmes(root,layout)
+    for g in layout['groups']:check_owned(root/g['name'],public.get(g['name']+'/README.md'))
     original=[p for p in root.iterdir() if p.name not in {g['name'] for g in layout['groups']} and p.name!=STATE]
     stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     backup=root/'backups/workspace-organization'/stamp;backup.mkdir(parents=True)
@@ -120,6 +171,7 @@ def apply(root,clean_cache=False):
     try:
         for g in layout['groups']:
             folder=root/g['name'];files,links=build_files(root,g)
+            if g['name']+'/README.md' in public:files['README.md']=public[g['name']+'/README.md']
             stage=backup/'prepared'/g['name'];stage.mkdir(parents=True)
             if g['name'].startswith('00_'):
                 for label,rel in [('Open_Daily_Overview (每日总览).command','reports/dashboard/latest/index.html')]:
