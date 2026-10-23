@@ -169,7 +169,7 @@ Service configuration, health checks and logs. Services keep their existing path
 
 ## 06_Tests_and_Tools (测试与工具)
 
-Automated tests and explicit maintenance tools; verification scripts can have side effects. (自动测试与维护工具，验收脚本可能联网或写记录。)
+Tests live in tests/, maintenance commands in scripts/, data comparison and historical acceptance in tools/. Some tools read or write local records. (测试、维护、对比及历史验收分别归类，执行前核对说明。)
 
 [Open category (打开分类)](../06_Tests_and_Tools%20%28%E6%B5%8B%E8%AF%95%E4%B8%8E%E5%B7%A5%E5%85%B7%29/README.md)
 
@@ -187,7 +187,7 @@ Evidence and recoverable changes. Do not confuse backups with active code. (证�
 
 ## 09_Environment (环境与依赖)
 
-Dependency definitions, vendor library and required certificate chain. (依赖定义、第三方库及必要证书链。)
+requirements.txt is the basic installation list; config/environments/ keeps optional historical environment versions. (首页保留基础安装清单，历史环境版本集中保存。)
 
 [Open category (打开分类)](../09_Environment%20%28%E7%8E%AF%E5%A2%83%E4%B8%8E%E4%BE%9D%E8%B5%96%29/README.md)
 
