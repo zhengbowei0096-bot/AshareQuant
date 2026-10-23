@@ -1571,8 +1571,32 @@
     },
     {
       "name": "06_Tests_and_Tools (测试与工具)",
-      "purpose": "Automated tests and explicit maintenance tools; verification scripts can have side effects. (自动测试与维护工具，验收脚本可能联网或写记录。)",
+      "purpose": "Tests live in tests/, maintenance commands in scripts/, data comparison and historical acceptance in tools/. Some tools read or write local records. (测试、维护、对比及历史验收分别归类，执行前核对说明。)",
       "entries": [
+        {
+          "target": "tools/compare_sources.py",
+          "label": "compare_sources.py",
+          "purpose": "Compare preserved historical source snapshots; needs local watchlist and data. Run from the project root with python -m tools.compare_sources. (历史来源对比，不是实时第二行情源。)",
+          "subfolder": "Validation_Tools (对比与验收)"
+        },
+        {
+          "target": "tools/verify_factors.py",
+          "label": "verify_factors.py",
+          "purpose": "Historical factor acceptance: cache idempotency, first-observed time and original feature count. Reads/writes local data and reports. (历史因子验收，有固定日期假设，运行前核对。)",
+          "subfolder": "Validation_Tools (对比与验收)"
+        },
+        {
+          "target": "tools/verify_models.py",
+          "label": "verify_models.py",
+          "purpose": "Historical model comparison acceptance: time splits, forecast replay and shadow records. Requires existing comparison results. (模型对比历史验收，需要已有本地报告。)",
+          "subfolder": "Validation_Tools (对比与验收)"
+        },
+        {
+          "target": "tools/verify_risk_models.py",
+          "label": "verify_risk_models.py",
+          "purpose": "Historical risk-model acceptance: training dates, shadow records and account consistency. Writes local evidence. (历史风险模型与账户一致性验收，不是盘中交易入口。)",
+          "subfolder": "Validation_Tools (对比与验收)"
+        },
         {
           "target": "tests",
           "label": "Automated_Tests (自动化测试)",
@@ -1588,7 +1612,7 @@
         {
           "target": "tools",
           "label": "Developer_Tools (开发工具)",
-          "purpose": "Existing data verification and decision examples. (已有数据验证工具与决策示例。)",
+          "purpose": "Data comparison, historical acceptance tools and decision examples; run modules from the project root. (数据对比、历史验收与示例，均从项目根目录运行。)",
           "subfolder": ""
         },
         {
@@ -1596,54 +1620,6 @@
           "label": "Editor_Settings (编辑器设置)",
           "purpose": "Local interpreter selection; retain without publishing. (本机解释器选择，不公开。)",
           "subfolder": ""
-        },
-        {
-          "target": "check_data.py",
-          "label": "check_data.py",
-          "purpose": "Compatibility or validation entry: check_data.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "compare_sources.py",
-          "label": "compare_sources.py",
-          "purpose": "Compatibility or validation entry: compare_sources.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "market_data.py",
-          "label": "market_data.py",
-          "purpose": "Compatibility or validation entry: market_data.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "market_data_tx.py",
-          "label": "market_data_tx.py",
-          "purpose": "Compatibility or validation entry: market_data_tx.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "update_watchlist.py",
-          "label": "update_watchlist.py",
-          "purpose": "Compatibility or validation entry: update_watchlist.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "verify_factors.py",
-          "label": "verify_factors.py",
-          "purpose": "Compatibility or validation entry: verify_factors.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "verify_models.py",
-          "label": "verify_models.py",
-          "purpose": "Compatibility or validation entry: verify_models.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
-        },
-        {
-          "target": "verify_risk_models.py",
-          "label": "verify_risk_models.py",
-          "purpose": "Compatibility or validation entry: verify_risk_models.py. Inspect before running. (兼容或验收入口，执行前查看说明。)",
-          "subfolder": "Root_Entry_Points (兼容与验收入口)"
         }
       ],
       "public_links": []
@@ -1780,25 +1756,25 @@
     },
     {
       "name": "09_Environment (环境与依赖)",
-      "purpose": "Dependency definitions, vendor library and required certificate chain. (依赖定义、第三方库及必要证书链。)",
+      "purpose": "requirements.txt is the basic installation list; config/environments/ keeps optional historical environment versions. (首页保留基础安装清单，历史环境版本集中保存。)",
       "entries": [
         {
-          "target": "requirements-models.lock.txt",
+          "target": "config/environments/requirements-models.lock.txt",
           "label": "requirements-models.lock.txt",
-          "purpose": "Dependency versions for installation/reproduction. (安装与复现用依赖版本。)",
-          "subfolder": ""
+          "purpose": "Recorded model-research environment versions; optional historical reproduction. (预测研究环境版本记录。)",
+          "subfolder": "Environment_Snapshots (环境版本记录)"
         },
         {
-          "target": "requirements-risk-models.lock.txt",
+          "target": "config/environments/requirements-risk-models.lock.txt",
           "label": "requirements-risk-models.lock.txt",
-          "purpose": "Dependency versions for installation/reproduction. (安装与复现用依赖版本。)",
-          "subfolder": ""
+          "purpose": "Recorded risk-model environment versions; optional historical reproduction. (风险模型研究环境版本记录。)",
+          "subfolder": "Environment_Snapshots (环境版本记录)"
         },
         {
-          "target": "requirements-stage1.lock.txt",
+          "target": "config/environments/requirements-stage1.lock.txt",
           "label": "requirements-stage1.lock.txt",
-          "purpose": "Dependency versions for installation/reproduction. (安装与复现用依赖版本。)",
-          "subfolder": ""
+          "purpose": "Recorded Stage 1 data-processing environment versions; optional historical reproduction. (数据阶段环境版本记录。)",
+          "subfolder": "Environment_Snapshots (环境版本记录)"
         },
         {
           "target": "requirements.txt",
@@ -1957,13 +1933,14 @@
       "asharequant/validation_readiness.py",
       "asharequant/work_archive.py",
       "asharequant/worker.py",
-      "check_data.py",
-      "compare_sources.py",
       "config/active_research_config.example.json",
       "config/adaptive_config.example.json",
       "config/config.example.json",
       "config/decision_config.example.json",
       "config/dynamic_config.example.json",
+      "config/environments/requirements-models.lock.txt",
+      "config/environments/requirements-risk-models.lock.txt",
+      "config/environments/requirements-stage1.lock.txt",
       "config/forecast_config.example.json",
       "config/intraday_config.example.json",
       "config/monitor_config.example.json",
@@ -1982,11 +1959,6 @@
       "docs/WORKSPACE_LAYOUT.md",
       "docs/文件逐项说明.html",
       "docs/文件逐项说明.md",
-      "market_data.py",
-      "market_data_tx.py",
-      "requirements-models.lock.txt",
-      "requirements-risk-models.lock.txt",
-      "requirements-stage1.lock.txt",
       "requirements.txt",
       "scripts/init_config.py",
       "scripts/organize_workspace.py",
@@ -2031,12 +2003,12 @@
       "tests/test_system.py",
       "tests/test_work_archive.py",
       "tests/test_workspace_organization.py",
+      "tools/compare_sources.py",
       "tools/decision_example.py",
-      "tools/verify_stage1.py",
-      "update_watchlist.py",
-      "verify_factors.py",
-      "verify_models.py",
-      "verify_risk_models.py"
+      "tools/verify_factors.py",
+      "tools/verify_models.py",
+      "tools/verify_risk_models.py",
+      "tools/verify_stage1.py"
     ]
   },
   "root_visible_files": [
