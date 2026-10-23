@@ -29,7 +29,7 @@ class DailyResearchTests(unittest.TestCase):
         self.stack.enter_context(patch.object(lc,'admission',return_value={'status':'BLOCKED'}))
 
     def test_daily_study_without_drift_and_same_session_deduplicated(self):
-        a=daily.run(self.root);b=daily.run(self.root)
+        a=daily.legacy_run(self.root);b=daily.legacy_run(self.root)
         self.assertEqual(self.search.call_count,1)
         self.assertEqual(a['research_progress']['status'],'DAILY_MATURED_OUTCOMES')
         self.assertEqual(b['research_progress']['status'],'ALREADY_RESEARCHED_SESSION')
@@ -40,23 +40,23 @@ class DailyResearchTests(unittest.TestCase):
         self.assertTrue((self.root/'reports/iteration/latest/index.html').is_file())
 
     def test_new_day_requires_new_actual_outcomes(self):
-        daily.run(self.root);self.at=pd.Timestamp('2026-10-26T19:00:00+08:00')
-        r=daily.run(self.root)
+        daily.legacy_run(self.root);self.at=pd.Timestamp('2026-10-26T19:00:00+08:00')
+        r=daily.legacy_run(self.root)
         self.assertEqual(r['research_progress']['status'],'NO_NEW_MATURED_OUTCOMES')
-        self.ids.append('two');r=daily.run(self.root)
+        self.ids.append('two');r=daily.legacy_run(self.root)
         self.assertEqual(self.search.call_count,2)
         self.assertEqual(r['research_progress']['status'],'DAILY_MATURED_OUTCOMES')
         self.assertIsNone(r['research_progress']['next_review_at'])
 
     def test_data_failure_does_not_consume_outcomes(self):
         self.errors=[dict(symbol='600000',error='STALE_OR_MISSING_SNAPSHOT')]
-        r=daily.run(self.root);self.assertEqual(r['status'],'INPUT_ERRORS');self.search.assert_not_called()
+        r=daily.legacy_run(self.root);self.assertEqual(r['status'],'INPUT_ERRORS');self.search.assert_not_called()
         self.assertFalse((self.root/'data/iteration/daily_studies/2026-10-23.json').exists())
-        self.errors=[];daily.run(self.root);self.search.assert_called_once()
+        self.errors=[];daily.legacy_run(self.root);self.search.assert_called_once()
 
     def test_candidate_error_does_not_complete_checkpoint(self):
         self.study['errors']=[{'error':'bad'}]
-        r=daily.run(self.root);self.assertEqual(r['status'],'INPUT_ERRORS')
+        r=daily.legacy_run(self.root);self.assertEqual(r['status'],'INPUT_ERRORS')
         self.assertFalse((self.root/'data/iteration/daily_studies/2026-10-23.json').exists())
 
     def test_pending_experiment_preserved_and_evaluated(self):
@@ -64,7 +64,7 @@ class DailyResearchTests(unittest.TestCase):
         state.write_text(json.dumps({'candidate_experiment':'frozen'}))
         with lc.database(self.root) as db:lc.put(db,'specs','frozen',dict(experiment='frozen',runtime_hash=lc.runtime_hash(),frozen_at=self.at.isoformat(),training_asof='2026-10-22'))
         with patch.object(lc,'settle') as settle,patch.object(lc,'select_portfolio'),patch.object(lc,'collect'),patch.object(lc,'evaluate',return_value={'status':'WAITING_FOR_UNTOUCHED_TEST'}),patch.object(lc,'promote',return_value=None):
-            r=daily.run(self.root)
+            r=daily.legacy_run(self.root)
         settle.assert_called_once();self.search.assert_not_called()
         self.assertEqual(json.loads(state.read_text())['candidate_experiment'],'frozen')
         self.assertEqual(r['research_progress']['status'],'FROZEN_VALIDATION_PENDING')
@@ -74,9 +74,9 @@ class DailyResearchTests(unittest.TestCase):
         self.study['eligible_for_future_test']=True
         self.search.return_value=([self.study],self.study)
         with patch.object(lc,'prepare',side_effect=ValueError('disk full')):
-            self.assertEqual(daily.run(self.root)['status'],'INPUT_ERRORS')
+            self.assertEqual(daily.legacy_run(self.root)['status'],'INPUT_ERRORS')
         with patch.object(lc,'prepare',return_value={'experiment':'new'}) as prepare:
-            r=daily.run(self.root)
+            r=daily.legacy_run(self.root)
         self.assertEqual(self.search.call_count,1);prepare.assert_called_once()
         self.assertEqual(r['candidate']['evaluation'],'WAITING_FOR_FIRST_FUTURE_CLOSE')
         self.assertIsNone(r['research_progress']['next_research_at'])
@@ -88,15 +88,15 @@ class DailyResearchTests(unittest.TestCase):
 
     def test_unknown_or_changed_frozen_version_is_not_discarded(self):
         p=self.root/'data/iteration/state.json';p.parent.mkdir(parents=True);p.write_text('{"candidate_experiment":"missing"}')
-        r=daily.run(self.root);self.search.assert_not_called()
+        r=daily.legacy_run(self.root);self.search.assert_not_called()
         self.assertEqual(r['status'],'INPUT_ERRORS')
         self.assertEqual(json.loads(p.read_text())['candidate_experiment'],'missing')
 
     def test_completed_checkpoint_tampering_blocks_reuse(self):
-        daily.run(self.root)
+        daily.legacy_run(self.root)
         p=self.root/'data/iteration/daily_studies/2026-10-23.json'
         value=json.loads(p.read_text());value['winner']=self.study;p.write_text(json.dumps(value))
-        with self.assertRaisesRegex(ValueError,'CHECKSUM'):daily.run(self.root)
+        with self.assertRaisesRegex(ValueError,'CHECKSUM'):daily.legacy_run(self.root)
         self.assertEqual(self.search.call_count,1)
 
 
