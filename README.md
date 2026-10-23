@@ -6,6 +6,18 @@
 
 它不是“保证赚钱”的选股工具。与普通行情软件相比，本项目重点是记录每次预测、验证预测是否有效、比较策略并持续模拟记账。使用者可以查看判断依据和不交易原因，开发者可以复现计算和测试。
 
+## Start here (首页入口)
+
+[Quick start (安装与启动)](#快速开始) · [File guide (文件说明)](docs/FILE_GUIDE.md) · [Architecture (架构)](docs/ARCHITECTURE.md) · [Security (安全说明)](docs/SECURITY.md) · [Validation (验证记录)](docs/VALIDATION.md)
+
+| Root file (根目录文件) | Purpose (用途) |
+|---|---|
+| [README.md](README.md) | 项目首页：功能、安装、运行与限制；GitHub 自动在仓库首页展示全文 |
+| [requirements.txt](requirements.txt) | 安装 Python 基础依赖使用的清单 |
+| [AGENTS.md](AGENTS.md) | 项目维护规则：修改代码时同步说明、分类与测试 |
+
+这三个文件在桌面项目根目录直接显示，与下面的十个分类入口并列。安全与其他详细说明保留在 `docs/`，通过本页直达。
+
 ## Workspace navigation (分类入口)
 
 GitHub 与桌面使用同一套 **00–09 分类顺序**。点击下表或仓库顶部同名文件夹，即可阅读用途并打开对应程序。公开页面只链接审核过的源码、模板和说明；账户、密钥、账本、报告及备份留在本机。
