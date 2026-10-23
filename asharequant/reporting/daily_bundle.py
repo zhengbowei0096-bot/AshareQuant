@@ -4,7 +4,7 @@ import csv,hashlib,html,json,math,shutil,sqlite3
 import pandas as pd
 from ..core import now,write_json,read_watchlist,read_snapshot,atomic_text
 
-REPORTS=[('模型研究进度','iteration/latest','index.html'),('实时行情驱动模拟委托与收益','dynamic/latest','index.html'),('动态盘中研究模拟主账本','adaptive/latest','index.html'),('原冻结预测盘中策略对照','intraday/latest','index.html'),('日线研究模拟对照（22.5% / 45% / 45%）','active_research/latest','index.html'),('风险预算同源策略对比（影子模拟）','strategy_experiment/latest','index.html'),('原研究策略对照计划与连续收益','research_paper/latest','index.html'),('模型准入进度与加速边界','validation_readiness/latest','index.html'),('独立风控模拟调仓方案','risk_control/latest','index.html'),('原策略对照账户与收益','paper_account/latest','index.html'),('预测与排名','forecasts/latest','index.html'),('交易计划','decisions/latest','index.html'),
+REPORTS=[('模型训练与验证','iteration/latest','index.html'),('实时行情驱动模拟委托与收益','dynamic/latest','index.html'),('动态盘中研究模拟主账本','adaptive/latest','index.html'),('原冻结预测盘中策略对照','intraday/latest','index.html'),('日线研究模拟对照（22.5% / 45% / 45%）','active_research/latest','index.html'),('风险预算同源策略对比（影子模拟）','strategy_experiment/latest','index.html'),('原研究策略对照计划与连续收益','research_paper/latest','index.html'),('模型准入进度与加速边界','validation_readiness/latest','index.html'),('独立风控模拟调仓方案','risk_control/latest','index.html'),('原策略对照账户与收益','paper_account/latest','index.html'),('预测与排名','forecasts/latest','index.html'),('交易计划','decisions/latest','index.html'),
  ('预测质量','prediction_quality/latest','index.html'),('模型监控','model_monitor/latest','index.html'),
  ('候选模型比较','model_comparison/latest','index.html'),('风险模型','risk_models/latest','index.html'),
  ('新增因子研究','factor_research/latest','index.html'),('股票池概览','latest','index.html')]
@@ -162,6 +162,12 @@ def export(root,session,result,destination=None):
             writer=csv.DictWriter(f,fieldnames=columns);writer.writeheader();writer.writerows(rows)
     from ..report_navigation import prepare,primary_section,overview_entry,current_only,hidden_strategies
     prepare(root)
+    # Refresh the dedicated presentation only; never run research or rewrite predictions.
+    from .model_activity import document as model_document
+    iteration_path=root/'reports/iteration/latest.json'
+    try:iteration=json.loads(iteration_path.read_text()) if iteration_path.exists() else {}
+    except (ValueError,OSError):iteration={}
+    atomic_text(root/'reports/iteration/latest/index.html',model_document(root,iteration,session))
     # Mirror latest paths to retain report-to-report relative links. No historical tree copies.
     links=[];hashes={}
     for title,relative,entry in REPORTS:
@@ -192,6 +198,7 @@ def export(root,session,result,destination=None):
     mode_label='最近完整交易日验收（未占用今日18点任务）' if result.get('mode')=='ACCEPTANCE' else '每日运行'
     if result.get('mode')=='UI_REFRESH':mode_label='报告界面与主模拟入口更新（未重跑每日分析）'
     page+=f'<p>{mode_label}</p><h1>{e(session)} 每日量化报告</h1><p>北京时间生成：{e(now().isoformat())} · 流水线状态：{e(result.get("status","UNKNOWN"))}</p><p class="bad">归档日期不等于所有附件行情日期。失败或预览时附件可能是旧报告；请核对各页时间，不当作当天信号。</p>'
+    page+='<nav aria-label="报告栏目"><a href="#account-income">账户与收益</a> · <a href="详细报告/iteration/latest/index.html">模型训练与验证</a></nav>'
     page+=primary_section(root)
     page+=account_section(perf['account_ledger'],session)
     paper_path=root/'reports/paper_account/latest/report.json'
@@ -207,9 +214,7 @@ def export(root,session,result,destination=None):
     if research:
         research_current=research.get('valuation_date')==session
         page+=f'<section><h2>当前使用：研究模型模拟账户</h2><p>模型版本：{e(research.get("spec",{}).get("version","未知"))}；估值日期：{e(str(research.get("valuation_date")))}；状态：{e(research.get("status","未知"))}。日收益：{pct(research.get("daily_return") if research_current else None)}；从原始基准累计收益：{pct(research.get("cumulative_from_original") if research_current else None)}；新模型阶段收益：{pct(research.get("research_segment_return") if research_current else None)}。</p><p><a href="详细报告/research_paper/latest/index.html">查看当前模型的90组预测、次日模拟买卖建议和连续收益单</a>。未验证模型允许参与研究模拟，正式模型仍受原验证门槛约束。原策略账户仅作对照，不能将其“未通过”理解为研究模拟暂停。</p></section>'
-    iteration=load_report('iteration/latest.json');quality=load_report('prediction_quality/latest/report.json');decision=load_report('decisions/latest/decision.json')
-    from .iteration_status import render as iteration_section
-    page+=iteration_section(root,iteration,quality,session)
+    decision=load_report('decisions/latest/decision.json')
     page+='<section><h2>正式模型计划限制（独立于研究模拟）</h2><p>计划来源数据日：'+e(str(decision.get('source_forecast_asof','缺失')))+'</p><ul>'+''.join('<li>'+e(str(x))+'</li>' for x in decision.get('blockers',['未取得决策报告']))+'</ul><p>用户手动交易。持仓快照未更新时，不据此计算真实收益或承诺可执行订单。</p></section>'
     page+='<section><h2>分类报告</h2><ul>'+''.join('<li>'+('<a href="'+e(x['url'])+'">'+e(x['title'])+'</a>（请看原报告日期）' if x['url'] else e(x['title'])+'：缺失')+'</li>' for x in links)+'</ul></section>'
     page+='<section><h2>30只股票每日涨跌与跟踪累计收益</h2><p>后复权收盘价格比值，仅为观察参考；不扣账户交易费用，不是个人账户收益。累计基准建立后固定，不随每天运行重置。</p><p><a href="股票每日与累计收益.csv">下载股票收益单</a></p><div class="scroll"><table><tr><th>代码</th><th>名称</th><th>实际数据日</th><th>日涨跌</th><th>跟踪累计</th><th>基准日</th><th>状态</th></tr>'+table+'</table></div></section>'
