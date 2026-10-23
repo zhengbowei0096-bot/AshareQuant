@@ -98,11 +98,12 @@ asharequant/
   daily.py            每日流水线
   scheduler.py        北京时间调度
 config/               非敏感配置模板
+  environments/       历史研究环境的依赖版本记录
 scripts/              初始化等维护入口
 tests/                自动化测试
 docs/                 架构与安全说明
-tools/                原有数据源维护工具
-requirements*.txt     基础依赖和研究环境版本记录
+tools/                数据对比、历史验收与决策示例
+requirements.txt      基础安装依赖（首页保留）
 ```
 
 部分核心实现保留原路径，因为模型和模拟账本用源码指纹核验版本。旧导入入口保留兼容；不应仅凭文件名相似就删除。完整对应关系见 [代码导航](docs/ARCHITECTURE.md)。
@@ -137,7 +138,29 @@ python -m asharequant.cli daily --root .
 python -m asharequant.cli daily-verify --root .
 ```
 
-更多入口使用 `--help` 查看，包括 `forecast`、`decision`、`portfolio-validate`、`lifecycle`、`paper-account`、`active-research`、`connection-health`。训练研究依赖可参考 `requirements-models.lock.txt` 和 `requirements-risk-models.lock.txt`；这些是已有环境版本记录，不保证任意平台均可安装。
+更多入口使用 `--help` 查看，包括 `forecast`、`decision`、`portfolio-validate`、`lifecycle`、`paper-account`、`active-research`、`connection-health`。训练研究依赖可参考 `config/environments/requirements-models.lock.txt` 和 `config/environments/requirements-risk-models.lock.txt`；这些是已有环境版本记录，不保证任意平台均可安装。
+
+## Maintenance tools (维护与验收工具)
+
+常用数据更新和检查统一从项目根目录运行：
+
+```bash
+python -m asharequant.cli run --root .
+python -m asharequant.cli check --root .
+python -m tools.compare_sources
+```
+
+| File (文件) | Purpose and prerequisites (用途与前提) |
+|---|---|
+| [tools/compare_sources.py](tools/compare_sources.py) | 对比保留的历史数据来源；需要本地观察池和原始快照，不会启动实时盯盘 |
+| [tools/verify_factors.py](tools/verify_factors.py) | 历史因子验收；包含固定观测日期与特征数量假设，可能更新因子数据并写报告 |
+| [tools/verify_models.py](tools/verify_models.py) | 核对已有模型对比报告、时间划分和预测重放，需要本地研究结果 |
+| [tools/verify_risk_models.py](tools/verify_risk_models.py) | 核对风险模型报告、影子记录和旧账户快照，属于历史验收工具 |
+| [Environment versions (环境版本记录)](config/environments/) | 三份历史阶段依赖清单，保留原版本供复现；日常安装仍用根目录 requirements.txt |
+
+历史验收工具使用 `python -m tools.verify_factors`、`python -m tools.verify_models` 或 `python -m tools.verify_risk_models`，在已准备对应数据的项目根目录运行。它们会运行测试并生成本地证据，有历史特定假设，不是每天必须执行的启动器，也不代表当前模型已经验收。
+
+已移除四个无独立逻辑、且未被现有自动任务调用的重复入口：`check_data.py` 改用 `cli check`；`market_data.py`、`market_data_tx.py`、`update_watchlist.py` 改用 `cli run`。完整命令见上方；删除的是转发入口，其调用的数据、预测与交易功能保留。旧版本可由 Git 或本机变更备份恢复。
 
 ## 每日与盘中工作
 

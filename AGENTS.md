@@ -39,3 +39,5 @@ Future file changes must update `config/workspace_layout.json`, `docs/FILE_GUIDE
 Public GitHub navigation uses the same ten category folders, with only each category README committed. When adding public files, update `public_navigation.files` and category coverage in `config/workspace_layout.json`, then regenerate the category pages and file guides together. Do not publish generated local launchers, symlinks, inventories, accounts or reports. (公开分类页与桌面同序；新源码须加入审核清单并归类，私有运行产物不发布。)
 
 Keep `root_visible_files` aligned with homepage documentation. `README.md`, `requirements.txt` and `AGENTS.md` remain directly visible beside the numbered categories; do not hide these entry files on future refreshes. (首页文件与分类并列可见，后续整理不得再次隐藏。)
+
+Keep data comparison and historical acceptance utilities in `tools/`, and recorded dependency environments in `config/environments/`. Root `requirements.txt` remains the basic installer list. Do not reintroduce removed forwarding launchers; use the CLI and document any path migration and source-archive coverage. (工具与环境记录归类保存，首页仅留常用入口。)
